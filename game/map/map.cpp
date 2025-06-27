@@ -25,9 +25,103 @@ PRIM_POLY3D_TEX ground_poly[]=
 	{  50000.0f,  0, 50000.0f, 0xffffffff,  1.0f, 1.0f },
 };
 
+PRIM_POLY3D up_down_poly[]=   
+{
+	{      0.0f,  12000,     0.0f, 0x80ff0000 },			//左上角
+	{  50000.0f,  12000,     0.0f, 0x80ff0000 },			//右上角
+	{      0.0f, GROUND,     0.0f, 0x80ff0000 },			//左下角
+	{  50000.0f, GROUND,     0.0f, 0x80ff0000 },			//右下角
+};
+
+PRIM_POLY3D right_left_poly[]=   
+{
+	{      0.0f,  12000,     0.0f, 0x80ff0000 },			//左上角
+	{      0.0f,  12000, 50000.0f, 0x80ff0000 },			//右上角
+	{      0.0f, GROUND,     0.0f, 0x80ff0000 },			//左下角
+	{      0.0f, GROUND, 50000.0f, 0x80ff0000 },			//右下角
+};
+
 
 SINT32 clear_flag = 0;				//ここの値が変わると地球が荒廃する
+SINT32 geme_over_flag = 0;
 SINT32 main_bill_hp = 100;			//メインビルのHPを格納する( 一応0だと怖いので0以外を入れておく )
+
+
+//-----------------------------------------------------------------------------------------------------------------------
+//地面を描写させるタスク
+//-----------------------------------------------------------------------------------------------------------------------
+void lr_wall_drawfunc( TASK *ap )
+{
+	SOZ_set_model_param( ZBUF_TEST | ZBUF_WRITE, BILINEAR_ON, LIGHTING_OFF, SPECULAR_OFF );
+	SOZ_ResetClipping();
+	SOZ_reset_fog();           //fogをリセット
+	SOZ_set_culling( D3DCULL_NONE ); 
+	SOZ_blend_setting( BLEND_NORMAL );
+	SOZ_set_texture( 0, NULL );
+
+	//プリミティブ転送
+	SOZ_matrix_model_maker( 0, ap->pos[X], ap->pos[Y], ap->pos[Z], ap->ang[X],  ap->ang[Y], ap->ang[Z], ap->scale[X], ap->scale[Y], ap->scale[Z] );
+	SOZ_render_start();
+	SOZ_primitive_draw( D3DPT_TRIANGLESTRIP, 2, right_left_poly, sizeof( PRIM_POLY3D ), FVF_POLY3D );
+	SOZ_render_end();
+}
+
+void lr_wall_exec(TASK *ap)
+{
+	ap->task_id = TASK_PROGRAM;
+
+	if( ap->pos[X] == jiki->pos[X] )
+		ap->task_id = TASK_GRP;	
+}
+
+void lr_wall_start( FLOAT x )
+{
+	TASK *ap;
+	ap = TASK_start_DRAWFUNC( lr_wall_exec, lr_wall_drawfunc, MAP_GROUP, "地面" );
+	ap->pos[X] = x;
+	ap->pos[Y] = 0.0f;
+	ap->pos[Z] = 0.0f;
+	ap->grp_mode |= USE_2DMODEL_POS;
+	ap->pri = SHOT_PRI * WP;
+}
+
+
+void ud_wall_drawfunc( TASK *ap )
+{
+	SOZ_set_model_param( ZBUF_TEST | ZBUF_WRITE, BILINEAR_ON, LIGHTING_OFF, SPECULAR_OFF );
+	SOZ_ResetClipping();
+	SOZ_reset_fog();           //fogをリセット
+	SOZ_set_culling( D3DCULL_NONE ); 
+	SOZ_blend_setting( BLEND_NORMAL );
+	SOZ_set_texture( 0, NULL );
+
+	//プリミティブ転送
+	SOZ_matrix_model_maker( 0, ap->pos[X], ap->pos[Y], ap->pos[Z], ap->ang[X],  ap->ang[Y], ap->ang[Z], ap->scale[X], ap->scale[Y], ap->scale[Z] );
+	SOZ_render_start();
+	SOZ_primitive_draw( D3DPT_TRIANGLESTRIP, 2, up_down_poly, sizeof( PRIM_POLY3D ), FVF_POLY3D );
+	SOZ_render_end();
+}
+
+void ud_wall_exec(TASK *ap)
+{
+	ap->task_id = TASK_PROGRAM;
+
+	if( ap->pos[Z] == jiki->pos[Z] )
+		ap->task_id = TASK_GRP;	
+}
+
+void ud_wall_start( FLOAT z )
+{
+	TASK *ap;
+	ap = TASK_start_DRAWFUNC( ud_wall_exec, ud_wall_drawfunc, MAP_GROUP, "地面" );
+	ap->pos[X] = 0.0f;
+	ap->pos[Y] = 0.0f;
+	ap->pos[Z] = z;
+	ap->grp_mode |= USE_2DMODEL_POS;
+	ap->pri = SHOT_PRI * WP;
+	
+}
+
 
 //-----------------------------------------------------------------------------------------------------------------------
 //地面のy座標をタスクの位置に代入する関数
@@ -172,9 +266,25 @@ void main_bill_start( void )
 void sky_exec( TASK *ap )
 {
 	//ap->pos[Y] += 0x1;
-	ap->pos[X] = jiki->pos[X];
-	//ap->pos[Y] = ;
-	ap->pos[Z] = jiki->pos[Z];
+	if( ap->work1[ X ] != 0 )
+	{
+		ap->pos[ X ] = jiki->pos[ X ];
+		//ap->pos[Y] = ;
+		ap->pos[ Z ] = jiki->pos[ Z ];
+	}
+#if 0
+	else
+	{
+		if( SOZ_Inkey_DAT( DIK_UP ) != 0 )
+			ap->pos[Z] += 100.0f;
+		if( SOZ_Inkey_DAT( DIK_DOWN ) != 0 )
+			ap->pos[Z] -= 100.0f;
+		if( SOZ_Inkey_DAT( DIK_LEFT ) != 0 )
+			ap->pos[X] -= 100.0f;
+		if( SOZ_Inkey_DAT( DIK_RIGHT ) != 0 )
+			ap->pos[X] += 100.0f;
+	}
+#endif
 	ap->ang[Y] += 0xc;
 	//ap->ang[X] += 0xff;
 //	ap->tex_no = 35;
@@ -182,14 +292,14 @@ void sky_exec( TASK *ap )
 }
 
 
-void sky_start( SINT32 model_no, SINT32 tex_no,  FLOAT y, FLOAT scale_x, FLOAT scale_y, FLOAT scale_z )
+void sky_start( SINT32 model_no, SINT32 tex_no,  FLOAT y, FLOAT scale_x, FLOAT scale_y, FLOAT scale_z, SINT32 game_or_title )
 {
 	TASK *ap;
 	ap = TASK_start_MODEL( sky_exec, 0, model_no, tex_no, "ドーム状の空" );
-	ap->grp_mode =  TEST_ZBUFFER |USE_2DMODEL_POS | NO_SHADOW | USE_LIGHTING;// | USE_SPECULAR;
-	ap->pos[X] = 15000;
+	ap->grp_mode =  TEST_ZBUFFER | USE_2DMODEL_POS | NO_SHADOW | USE_LIGHTING;// | USE_SPECULAR;
+	ap->pos[X] = 26000;
 	ap->pos[Y] = y;
-	ap->pos[Z] = 15000;
+	ap->pos[Z] = 8100;
 	ap->scale[X] = scale_x;
 	ap->scale[Y] = scale_y;
 	ap->scale[Z] = scale_z;
@@ -198,6 +308,7 @@ void sky_start( SINT32 model_no, SINT32 tex_no,  FLOAT y, FLOAT scale_x, FLOAT s
 	ap->ambient[1] = ap->ambient[0];
 	ap->ambient[2] = ap->ambient[1];
 	ap->ambient[3] = ap->ambient[2];
+	ap->work1[X] = game_or_title;
 	//ap->emissive[0] = 3.0f;
 	//ap->emissive[1] = 3.0f;
 	//ap->emissive[2] = 3.0f;

@@ -99,6 +99,13 @@ void replay_start( void )
 }
 
 
+void flag_init(void)
+{
+    game_over_flag = 0;
+    clear_flag = 0;
+}
+
+
 //------------------------------------------------------------------------------------------------------------------------------------------------------
 //   メインルーチン		1/60秒に一回呼ばれている
 //------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -113,15 +120,17 @@ void GAMEMAIN_Routine( void )
             mouse_ang_box_set();
             se_load();                                                  //効果音を読み込む
             //曲の再生
-            SOZ_Music_Load( 1 , "grp/bgm/game_main" , 1 );
-            SOZ_set_fog_param( 0xffffffff, 0.0f, 30000.0f, 0.1f );
-            game_type = 10;                                             //タイトル画面
+            SOZ_set_fog_param( 0xffffffff, 0.0f, 50000.0f, 0.1f );
+            common_model_load();
+            common_tex_load();
+            game_type = 5;                                              //タイトル画面
 #if KAWAGUCHI
-            game_type = 10;                                             //タイトル画面
+            //game_type = 10;                                           //チュートリアル画面
             //game_type = 100;                                          //ゲーム画面
             //game_type = 500;
             //game_type = 1000;                                         //ゲーム画面のエディター
             //game_type = 2000;                                         //タイトルのエディター
+            //game_type = 3000;
 			break;
 #endif
         case 1:
@@ -129,49 +138,79 @@ void GAMEMAIN_Routine( void )
            break;
 
 //------------------------タイトル画面-------------------------------//
-        case 10:                                                        //タイトル画面
-//ファイルの読み込みやマウス位置の設定
-            record_mane_start();
-            SOZ_Music_Stop( 1 );
-            SetCursorPos( WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 );        //最初にマウスを中心に移動させる
+        case TITLE_SCENE:
             tex_game_reset();                                           //ゲーム本編で使う
             model_game_reset();                                         //
             tex_title_load();                                           //テクスチャーのロード
             model_title_load();                                         //モデルのロード
             sequence_read( "data/title.bn", sequence_box );             //シーケンスを読み込み
+            sequence_set_object_start();                                //シーケンスでオブジェクトを出す
+            sky_start( MODEL_UFO_ROOM, TEX_UFO_ROOM, JIKI_Y,1.0f, 1.0f, 1.0f, 0 );        //UFOの中
+            title_logo_start();
+            ground_start( TEX_UFO_GROUND );                             //地面
+            tutorial_skep_mane_start();
+            replay_start();
+            unique_box_init();
+            camera_x[ MAIN_CAMERA ] = JIKI_X;
+            camera_y[ MAIN_CAMERA ] = JIKI_Y;
+            camera_z[ MAIN_CAMERA ] = -5000;
+            SOZ_camera_move( MAIN_CAMERA );
+            game_type++;
+            break;
+
+        case TITLE_SCENE + 1:       
+            break;
+
+//-----------------------チュートリアル画面--------------------------//
+        case TUTORIAL:                                                  //チュートリアル画面
+#if DEBUG
+            tex_title_load();                                           //テクスチャーのロード
+            model_title_load();                                         //モデルのロード
+            tex_game_load();                                            //テクスチャーのロード
+            model_game_load();                                          //モデルのロード
+#endif
+//ファイルの読み込みやマウス位置の設定
+            record_mane_start();
+            SOZ_Music_Stop( 1 );
+            SetCursorPos( WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 );        //最初にマウスを中心に移動させる
             select_and_page_read( "data/hi_score_data.bn", &hi_score );	//スコアの読み込み
             score = RESET;                                              //スコアを初期化
 
 //タスクを発生させる
-            socre_start( 32.0f, 72.0f, 1.2f, &hi_score );
             sequence_set_object_start();                                //シーケンスでオブジェクトを出す
+            socre_start( 32.0f, 72.0f, 1.2f, &hi_score );
             ground_start( TEX_UFO_GROUND );                             //地面
-            sky_start( MODEL_UFO_ROOM, TEX_UFO_ROOM, 4000.0f,1.0f, 1.0f, 1.0f );        //UFOの中
+            sky_start( MODEL_UFO_ROOM, TEX_UFO_ROOM, 4000.0f,1.0f, 1.0f, 1.0f, 1 );        //UFOの中
             main_computer_start();
             jiki_start();                                               //
             camera_control_start();                                     //カメラのコントロール
             mouse_get_cursor_start();
-            title_logo_start();
             common_ui_set();
             game_start_purpose_start();
-            icon_set();
+            //icon_set();
+            //icon_box_check_start();
+            score_board_start( JIKI_X, JIKI_Y - 500.0f, 15000.0f );
             icon_box_check_start();
-            score_board_start( JIKI_X, JIKI_Y, 15000.0f );
-            icon_box_check_start();
-            replay_start();
+            ud_wall_start( JIKI_Z );
+            ud_wall_start( 50000.0f );
+            lr_wall_start( 10000.0f );
+            lr_wall_start( 50000.0f );
+            scene_font_start();
+            unique_box_init();
+
             record_fram = 0;
             object_id = 0;
             catch_switch = RESET;                                       //つかみを初期化
             game_type++;
             break;
 
-        case 11:
+        case TUTORIAL + 1:
              SOZ_viewclip_maker( 0 );
             //何もなし
            break;
 
 //-----------------------------ゲーム画面---------------------------//
-        case 100:                                                       //ゲーム本編
+        case GAME:                                                       //ゲーム本編
 //ファイルの読み込みやマウス位置の設定
             SetCursorPos( WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 );        //最初にマウスを中心に移動させる
             tex_game_load();                                            //テクスチャーのロード
@@ -179,14 +218,16 @@ void GAMEMAIN_Routine( void )
             sequence_read( "data/game_map.bn", sequence_box );          //シーケンスを読み込み
             sequence_set_object_start();                                //シーケンスでオブジェクトを出す
             select_and_page_read( "data/hi_score_data.bn", &hi_score );	//スコアの読み込み
+            flag_init();                                                //
             score = RESET;                                              //スコアを初期化
 
 //デバッグ
 #if DEBUG
             particle_num_start();                                       //パーティクルの数を確認
             viwe_clip_num_start();                                      //視錐台カリングの数を確認
+            tex_title_load();                                           //テクスチャーのロード
+            model_title_load();                                         //モデルのロード
 #endif
-
 //曲の再生
             SOZ_Music_Load( 1 , "grp/bgm/game_main" , 1 );
 
@@ -200,7 +241,7 @@ void GAMEMAIN_Routine( void )
             camera_control_start();                                     //カメラのコントロール
             main_bill_start();                                          //メインのビル
             ground_start( TEX_GROUND );                                 //地面
-            sky_start( MODEL_SKY, TEX_SKY, -256.0f, 1.0f, 3.0f, 1.0f );                                                //空のドーム
+            sky_start( MODEL_SKY, TEX_SKY, -256.0f, 1.0f, 3.0f, 1.0f, 1 );                                                //空のドーム
             move_car_start( 2 );                                        //回る車
             common_ui_set();
             main_bill_hp_start();
@@ -209,45 +250,59 @@ void GAMEMAIN_Routine( void )
             icon_set();
             icon_box_check_start();
             particle_safety_start();
+            unique_box_init();
+            ud_wall_start( JIKI_Z );
+            ud_wall_start( 50000.0f );
+            lr_wall_start( 10000.0f );
+            lr_wall_start( 50000.0f );
             object_id = 0;
+            clear_flag = 0;
+            game_over_flag = 0;
             //sphire_debug_start();                                    //スフィアの円を可視化させる(未実装
             catch_switch = RESET;                                       //つかみを初期化
             game_type++;
             break;
 
-        case 101:
+        case GAME + 1:
             SOZ_set_light_pos( camera_x[0], camera_y[0], camera_z[0], 25000, GROUND, 25000 );         //ライティングを設定
             SOZ_viewclip_maker( 0 );
             //何もなし
             break;
 
 //-----------------------------ゲームクリア---------------------------//
-        case 110:
+        case GAME_CLERE:
             mobu_ufo_generator_start();                                 //UFOが出現する
             title_return_start( TIME_S + 30 );                          //キーをなにか押すとタイトル画面に行く
             dimension_write_the_file( "data/record.br", jiki_record, sizeof( RECORD ), TIME_M * 3 +1 );
+             geme_resurt_start( 0 );
+             screen_shutdown_start();
             game_type++;                                                //次に移動
             break;
 
-        case 111:
+        case GAME_CLERE + 1:
              SOZ_set_light_pos( camera_x[0], camera_y[0], camera_z[0], 25000, GROUND, 25000 );         //ライティングを設定
              SOZ_viewclip_maker( 0 );
             break;
 
 //-------------------------- ゲームオーバー --------------------------//
-        case 120:
+        case GAME_OVER:
             game_ovre_start();                                          //ヘリが飛んでくる
             title_return_start( TIME_S + 30 );                                   //キーをなにか押すとタイトル画面に行く
+            geme_resurt_start( 1 );
             dimension_write_the_file( "data/record.br", jiki_record, sizeof( RECORD ), TIME_M * 3 +1 );
+            efe_red_window_mane_start();
+            game_over_flag = 1;
             game_type++;                                                //次に移動
             break;
 
-        case 121:
+        case GAME_OVER + 1:
             SOZ_set_light_pos( camera_x[0], camera_y[0], camera_z[0], 25000, GROUND, 25000 );         //ライティングを設定
             SOZ_viewclip_maker( 0 );
             break;
 
-        case 500:
+
+//-------------------------- リプレイ --------------------------//
+        case REPLYE:
             //ファイルの読み込みやマウス位置の設定
             dimension_read_the_file( "data/record.br", jiki_record, sizeof( RECORD ), TIME_M * 3 +1 );
             SetCursorPos( WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 );        //最初にマウスを中心に移動させる
@@ -255,9 +310,12 @@ void GAMEMAIN_Routine( void )
             model_game_load();                                          //モデルのロード
             tex_title_load();                                           //テクスチャーのロード
             model_title_load();                                         //モデルのロード
+            common_model_load();
+            common_tex_load();
             sequence_read( "data/game_map.bn", sequence_box );          //シーケンスを読み込み
             sequence_set_object_start();                                //シーケンスでオブジェクトを出す
             select_and_page_read( "data/hi_score_data.bn", &hi_score );	//スコアの読み込み
+            
             score = RESET;                                              //スコアを初期化
 //曲の再生
             SOZ_Music_Load( 1 , "grp/bgm/game_main" , 1 );
@@ -270,7 +328,7 @@ void GAMEMAIN_Routine( void )
             camera_control_start();                                     //カメラのコントロール
             main_bill_start();                                          //メインのビル
             ground_start( TEX_GROUND );                                 //地面
-            sky_start( MODEL_SKY, TEX_SKY, -256.0f, 1.0f, 3.0f, 1.0f );                                                //空のドーム
+            sky_start( MODEL_SKY, TEX_SKY, -256.0f, 1.0f, 3.0f, 1.0f, 1 );                                                //空のドーム
             move_car_start( 2 );                                        //回る車
             common_ui_set();
             main_bill_hp_start();
@@ -280,13 +338,14 @@ void GAMEMAIN_Routine( void )
             icon_box_check_start();
             particle_safety_start();
             record_mane_start();
+            unique_box_init();
             object_id = 0;
             //sphire_debug_start();                                    //スフィアの円を可視化させる(未実装
             catch_switch = RESET;                                       //つかみを初期化
             game_type++;
             break;
 
-        case 501:
+        case REPLYE + 1:
             SINT32 i, index;
             index = 0;
             for( i = 0; i < 7; i++ )
@@ -298,7 +357,7 @@ void GAMEMAIN_Routine( void )
 
             if( index != 0 || rp->pos[X] == 0.0f )
             {
-                game_type = 10;
+                game_type = TITLE_SCENE;
                 TASK_all_init();
                 return;
             }
@@ -306,7 +365,9 @@ void GAMEMAIN_Routine( void )
              SOZ_set_light_pos( camera_x[0], camera_y[0], camera_z[0], 25000, GROUND, 25000 );         //ライティングを設定
              SOZ_viewclip_maker( 0 );
             break;
-        case 1000:                                                      //ゲーム画面のエディター
+
+
+        case GAME_EDITORE:                                              //ゲーム画面のエディター
 //------データをロード                                                 
             select_and_page_read( "data/select_data.bn", &select_no );	//セレクトを読み込み
 			select_and_page_read( "data/page_data.bn", &page );		    //ページを読み込み
@@ -315,6 +376,8 @@ void GAMEMAIN_Routine( void )
             model_title_load();                                         //モデルのロード
             tex_game_load();                                            //テクスチャーのロード
             model_game_load();                                          //モデルのロード
+            common_model_load();
+            common_tex_load();
 //------タスク関係
             model_name_start();                                         //モデルの名前を出す
             sequence_set_object_start();                                //シーケンスでオブジェクトを出す
@@ -322,22 +385,22 @@ void GAMEMAIN_Routine( void )
             object_editor_start();                                      //エディター
             camera_control_start();                                     //カメラのコントロール
             main_bill_start();                                          //メインのビル
-            ground_start( TEX_GROUND );                     //地面    
-            sky_start( MODEL_SKY, TEX_SKY, -256.0f, 1.0f, 3.0f, 1.0f );          //空のドーム
+            ground_start( TEX_GROUND );                                 //地面    
+            sky_start( MODEL_SKY, TEX_SKY, -256.0f, 1.0f, 3.0f, 1.0f, 1 ); //空のドーム
             move_car_start( 1 );                                        //回る車
-            record_mane_start();
+            //record_mane_start();                                        //
             //seq_delete( 18 );
-            //sphire_debug_start();                                       //スフィアの円を可視化させる(未実装
+            //sphire_debug_start();                                    //スフィアの円を可視化させる(未実装
             game_type++;
             break;
 
-        case 1001:
+        case GAME_EDITORE + 1:
             SOZ_viewclip_maker( 0 );
             arrow_check();                                              //毎フレーム調べる
             break;
 
-        case 2000:
-             select_and_page_read( "data/select_data.bn", &select_no );	//セレクトを読み込み
+        case TUTORIAL_EDITORE:
+            select_and_page_read( "data/select_data.bn", &select_no );	//セレクトを読み込み
 			select_and_page_read( "data/page_data.bn", &page );		    //ページを読み込み
             sequence_read( "data/" SAVE_FILE ".bn", sequence_box );           //シーケンスを読み込み
             tex_title_load();                 //テクスチャーのロード
@@ -351,14 +414,23 @@ void GAMEMAIN_Routine( void )
             object_editor_start();                                      //エディター
             camera_control_start();                                     //カメラのコントロール
             ground_start( TEX_UFO_GROUND );                 //地面
-            sky_start( MODEL_UFO_ROOM, TEX_UFO_ROOM, 15000.0f, 1.0f, 1.0f, 1.0f );                       //UFOの中
+            sky_start( MODEL_UFO_ROOM, TEX_UFO_ROOM, 15000.0f, 1.0f, 1.0f, 1.0f, 1 );                       //UFOの中
             main_computer_start();
             //sphire_debug_start();                                       //スフィアの円を可視化させる(未実装
             game_type++;
             break;
 
-        case 2001:
+        case TUTORIAL_EDITORE + 1:
             arrow_check();                                              //毎フレーム調べる
+            break;
+
+        case 3000:
+            screen_shutdown_start();
+             tex_game_load();                                            //テクスチャーのロード
+            model_game_load();                                          //モデルのロード
+            tex_title_load();                                           //テクスチャーのロード
+            model_title_load();                                         //モデルのロード
+            game_type++;
             break;
     }
     game_type_old = game_type;

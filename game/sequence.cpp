@@ -88,6 +88,24 @@ void heri_seq_set( TASK *ap )
 	heri_start( x, y, z, ang_x, ang_y, scale, magni_hp, magni_hp, id );		//車
 }
 
+void alien_seq_set(TASK *ap)
+{
+	SINT32	id;								//識別番号の変数
+	FLOAT	x, y, z, scale, magni_hp, magni_atk;	//座標とサイズと倍率の変数
+	ANGLE	ang_x, ang_y;					//角度の変数
+	//id = ( SINT32 )*ap->f_table++;		//識別番号を取り出す
+	x = *ap->f_table++;						//横の座標を取り出す
+	y = *ap->f_table++;						//縦の座標を取り出す
+	z = *ap->f_table++;						//前後の座標を取り出す
+	ang_x = ( ANGLE )*ap->f_table++;		//角度を入れるを取り出す
+	ang_y = ( ANGLE )*ap->f_table++;		//角度を入れるを取り出す
+	scale = *ap->f_table++;					//サイズを取り出す
+	magni_hp  = *ap->f_table++;				//ヒットポイントの倍率を取り出す
+	magni_atk = *ap->f_table++;				//攻撃の倍率を取り出す
+	id = ( SINT32 )*ap->f_table++;			//識別番号を取り出す
+	alien_start( x, y, z, ang_x, ang_y, scale, magni_hp, magni_hp, id );
+}
+
 
 //----------------------------------------------------------------------------------------------------
 //シーケンスを解読してマップに設置する
@@ -97,9 +115,6 @@ void sequence_set_object_exec( TASK *ap )
 	if( *ap->f_table != NULL )
 		switch( ( SINT32 )*ap->f_table++ )							//シーケンスの中からケースを取得する
 		{
-			case 1:	 case 8: case 9: case 10:case 11: case 12: case 13: case 14: case 15: case 18:
-				object_seq_set( ap );	break;						//オブジェクト
-
 			case 2: case 3: case 4:	case 5: case 6: case 7:
 				car_seq_set( ap );		break;						//車( 緑, 白, 黒 )
 
@@ -108,6 +123,12 @@ void sequence_set_object_exec( TASK *ap )
 
 			case 17:
 				heri_seq_set( ap );		break;
+
+			case 20:
+				alien_seq_set( ap );	break;
+
+			default:
+				object_seq_set( ap );	break;						//オブジェクト
 		}
 
 	if( *ap->f_table == -999 )

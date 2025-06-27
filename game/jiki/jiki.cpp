@@ -2,7 +2,7 @@
 //                systemOZ Ver3
 //			ゲームメインプログラム
 //						programed by TEAM_TAKUYA
-//------------------------------------------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------- --------------------------------------------------------------------------------------------
 #ifdef WINDOWS_PC
 #include    "../../../libs/systemOZ_v4/soz.h"
 #else
@@ -17,6 +17,12 @@
 //外部変数
 //-----------------------------------------------------------------------------------------------------------------------
 TASK *jiki;
+
+PARTS_RECT smoke_rect[]=
+{
+	{ 0, 0, 64, 64, 32, 32 },
+};
+
 PARTS_RECT bom_rect[]=								//爆発の矩形
 {
 	{    1,     1,   126,   126,    63,    63},		//0
@@ -39,9 +45,75 @@ PARTS_RECT bom_rect[]=								//爆発の矩形
 
 RECORD jiki_record[ TIME_M * 3 + 1 ];
 RECORD *rp;
-SINT32 record_fram = 0;;
+SINT32 record_fram = 0;
 
 SINT32 push_flag = 0;
+
+
+//-----------------------------------------------------------------------------------------------------------------------
+//ゲームオーバーになった時に煙が出る
+//-----------------------------------------------------------------------------------------------------------------------
+void game_over_efe_drawfunc(TASK *ap)
+{
+	ANGLE ang, angle;
+	TASK spr;
+	TASK_init_member_pointer( &spr );						//まずはタスクメモリの初期化
+	spr.tex_no = TEX_GAME_OVER_EFE;							//ゲームオーバーのテクスチャー
+	spr.uv_rect = smoke_rect;								//煙の矩形
+	spr.anime_no = 0;										//矩形の何番を使うか
+	spr.pos[Y] = ap->pos[Y];								//座標の縦を共通
+	spr.grp_mode = ap->grp_mode;
+	spr.scale[X] = ap->scale[X];
+	spr.scale[Y] = spr.scale[X];
+	spr.pri = SHOT_PRI * WP;
+
+	for( ang = 0; ang <= 0x10000; ang += 0x4000 )
+	{
+		angle = ap->angle[Z] + ang;
+		spr.pos[X] = ap->fwork1[X] + SOZ_get_sin( angle ) * ( ap->fwork2[X] * spr.scale[X] );
+		spr.pos[Z] = ap->fwork1[Z] + SOZ_get_cos( angle ) * ( ap->fwork2[X] * spr.scale[X] );
+		spr.pri--;
+		SOZ_sprite_draw( &spr );
+	}
+}
+
+void game_over_efe_exec(TASK *ap)
+{
+	
+	ap->pos[Y] += ap->vec[Y];
+	ap->vec[Y] += ap->acc[Y];
+	ap->angle[Z] += 0x400;
+	ap->fwork1[X] += 2.0f * ap->scale[X];
+	ap->fwork2[X] += ap->fwork2[Y];
+	ap->fwork2[Y] += ap->acc[P];
+	ap->TIMER++;
+	if( ap->TIMER > TIME_S * 3 )
+	{
+		TASK_end( ap );
+		return;
+	}
+}
+
+void game_over_efe_start( FLOAT x, FLOAT y, FLOAT z, FLOAT scale )
+{
+	TASK *ap;
+	ap = TASK_start_DRAWFUNC( game_over_efe_exec, game_over_efe_drawfunc, NO_GROUP, "ゲームオーバーの煙" );
+	ap->grp_mode = USE_3DPOS | TEST_ZBUFFER | WRITE_ZBUFFER;
+	ap->pos[X] = x;									//横座標
+	ap->pos[Y] = y;									//縦座標
+	ap->pos[Z] = z;									//奥行き
+	ap->vec[Y] = -2.0f;								//最初は下に行く
+	ap->acc[Y] = 0.25f;								//上の方向に加速させる
+	//ap->acc[P] = 0.15f;								//レングスの加速
+	ap->fwork1[X] = x;								//サインコサインでまわすための基準点
+	ap->fwork1[Z] = z;								//サインコサインでまわすための基準点
+	ap->fwork2[X] = 0.0f;							//レングス
+	ap->fwork2[Y] = 0.5f;
+	ap->fwork3[X] = F_Rand2( -50, 50 );				//中心位置のベクトル
+	ap->fwork3[Z] = F_Rand2( -50, 50 );				//中心位置のベクトル
+	ap->scale[X] = scale;
+}
+
 
 //-----------------------------------------------------------------------------------------------------------------------
 //ビームの爆発
@@ -71,7 +143,7 @@ void beam_bom_start( FLOAT x, FLOAT y, FLOAT z, FLOAT scale )
 	ap->cam_number = 0;
 	ap->scale[X] = scale;
 	ap->scale[Y] = ap->scale[X];
-	ap->pri = OBJECT_PRI * WP;
+	ap->pri = JIKI_PRI * WP;
 
 }
 
@@ -80,33 +152,36 @@ void beam_bom_start( FLOAT x, FLOAT y, FLOAT z, FLOAT scale )
 //-----------------------------------------------------------------------------------------------------------------------
 void beam_exec( TASK *ap )
 {
+	SINT32 group_box[ 3 ] = { OBJECT_GROUP, MAIN_BILL_GROUP, MAIN_COMP_GROUP };
+	SINT32 i;
 	TASK *actp;
 	OBJECT_DATA *op;
 	for( actp = ap_start; actp != NULL; actp = actp->next )
-		if( actp->task_group == OBJECT_GROUP || actp->task_group == MAIN_BILL_GROUP )
-			if( kawa_3d_hit_check( ap, actp ) != 0 )
-			{
-				op = &object_data[ actp->ID ];
-				if( actp->task_group == MAIN_BILL_GROUP )
+		for( i = 0; i < 3; i++ )
+			if( actp->task_group ==  group_box[ i ]  )
+				if( kawa_3d_hit_check( ap, actp ) != 0 )
 				{
-					hit_particle_occurrence( ap );
-					actp->HP -= ap->ATK;						//メインビルに対してのダメージを弱くする
+					op = &object_data[ actp->ID ];
+					if( actp->task_group == MAIN_BILL_GROUP )
+					{
+						hit_particle_occurrence( ap );
+						actp->HP -= ap->ATK;						//メインビルに対してのダメージを弱くする
+					}
+					else
+					{
+						actp->HP -= ap->ATK;
+					}
+
+					score += 11;
+
+					if( actp->HP <= 0 )
+						score += op->score;								//スコアを加算
+
+					SOZ_locate_print( 64, 5, "enemy_hp%5d", actp->HP );
+					beam_bom_start( ap->pos[X], ap->pos[Y], ap->pos[Z], F_Rand2( 3.0f, 6.0f ) );
+					TASK_end( ap );
+					return;
 				}
-				else
-				{
-					actp->HP -= ap->ATK;
-				}
-
-				score += 11;
-
-				if( actp->HP <= 0 )
-					score += op->score;								//スコアを加算
-
-				SOZ_locate_print( 64, 5, "enemy_hp%5d", actp->HP );
-				beam_bom_start( ap->pos[X], ap->pos[Y], ap->pos[Z], F_Rand2( 3.0f, 6.0f ) );
-				TASK_end( ap );
-				return;
-			}
 
 	task_id_checge( ap, 0 );					//視錐台カリング( チェックを外しとく )
 
@@ -135,7 +210,7 @@ void beam_start( FLOAT x, FLOAT y, FLOAT z,FLOAT vec_x, FLOAT vec_y, FLOAT vec_z
 	ap->vec[Y] = vec_y;
 	ap->vec[Z] = vec_z;
 	ap->ang[Y] = ang_y;
-	ap->ATK = 50;
+	ap->ATK = 90;
 	ap->sphire = 30.0f;
 	ap->pri = SHOT_PRI * WP;
 }
@@ -159,33 +234,33 @@ void movement_get_key( TASK *ap )
 	else if( SOZ_MouseZ() < -20 )
 		ap->pos[Y] -= 40.0f;
 
-	ap->vec[X] = SOZ_get_sin( -ang_y ) * 40.0f;
-	ap->vec[Y] = SOZ_get_sin( ang_x ) * 40.0f;
-	ap->vec[Z] = SOZ_get_cos( -ang_y ) * 40.0f;
+	ap->vec[X] = SOZ_get_sin( -ang_y ) * JIKI_SPEED * 2;
+	ap->vec[Y] = SOZ_get_sin( ang_x ) * JIKI_SPEED * 2;
+	ap->vec[Z] = SOZ_get_cos( -ang_y ) * JIKI_SPEED * 2;
 	//-----------キー入力-----------//
 	if( SOZ_Inkey_DAT( DIK_D ) != 0 )
 	{
 		if( ang_y > 0x0000 && 0x2000 >= ang_y || ang_y > 0xd000 )
-			ap->pos[X] -= 20.0f;
+			ap->pos[X] -= JIKI_SPEED;
 		else if( ang_y > 0x2000 && 0x6000 >= ang_y )
-			ap->pos[Z] -= 20.0f;
+			ap->pos[Z] -= JIKI_SPEED;
 		else if( ang_y > 0x6000 && 0xa000 >= ang_y )
-			ap->pos[X] += 20.0f;
+			ap->pos[X] += JIKI_SPEED;
 		else if( ang_y > 0xa000 && 0xd000 >= ang_y )
-			ap->pos[Z] += 20.0f;
+			ap->pos[Z] += JIKI_SPEED;
 
 	}
 
 	if( SOZ_Inkey_DAT( DIK_A ) != 0 )
 	{
 		if( ang_y > 0x0000 && 0x2000 >= ang_y || ang_y > 0xd000 )
-			ap->pos[X] += 20.0f;
+			ap->pos[X] += JIKI_SPEED;
 		else if( ang_y > 0x2000 && 0x6000 >= ang_y )
-			ap->pos[Z] += 20.0f;
+			ap->pos[Z] += JIKI_SPEED;
 		else if( ang_y > 0x6000 && 0xa000 >= ang_y )
-			ap->pos[X] -= 20.0f;
+			ap->pos[X] -= JIKI_SPEED;
 		else if( ang_y > 0xa000 && 0xd000 >= ang_y )
-			ap->pos[Z] -= 20.0f;
+			ap->pos[Z] -= JIKI_SPEED;
 	}
 
 	if( SOZ_Inkey_DAT( DIK_W ) != 0 )
@@ -242,8 +317,8 @@ void check_range_restriction( TASK *ap, FLOAT pos_x, FLOAT pos_y, FLOAT pos_z )
 	
 	if( ap->pos[Y] >= 10000.0f )			//特定の座標を超えたら
 		ap->pos[Y] = 10000.0f;				//それ以上進めないようにする
-	else if( ap->pos[Y] <= GROUND )			//特定の座標より小さくなったら
-		ap->pos[Y] = GROUND;				//それ以上進めないようにする
+	else if( ap->pos[Y] <= GROUND + 64.0f )	//特定の座標より小さくなったら
+		ap->pos[Y] = GROUND + 64.0f;		//それ以上進めないようにする
 }
 
 
@@ -274,6 +349,7 @@ void shot_move_jiki( TASK *ap )
 		TASK_end_group( HAND_GROUP );							//飛んでる手を消す
 		catch_switch = FALSE;									//つかみのフラグを一応初期化
 		hand_start( ap->pos[ X ], ap->pos[ Y ], ap->pos[ Z ], -bullet_vec_x * 2, bullet_vec_y * 2, -bullet_vec_z * 2, ap->angle[ X ], ap->work1[ Y ] );			//手を飛ばす
+		unique_box_init( );
 		rp->click[1] = 1;
 	}
 
@@ -281,12 +357,33 @@ void shot_move_jiki( TASK *ap )
 	{
 		ap->pos[X] = JIKI_X;									//初期位置を代入
 		ap->pos[Y] = JIKI_Y;									//初期位置を代入
-		ap->pos[Z] = JIKI_Z;									//初期位置を代入
+		ap->pos[Z] = JIKI_Z  + 100.0f;									//初期位置を代入
 		ap->angle[ Y ] = 0x00;									//角度も0にする
 	}
 }
 
 
+//-----------------------------------------------------------------------------------------------------------------------
+//オブジェクトに当たると止まるヒットチェック
+//-----------------------------------------------------------------------------------------------------------------------
+void object_hit_move_stop( TASK *ap, FLOAT pos_x, FLOAT pos_y, FLOAT pos_z )
+{
+	TASK *actp;
+	SINT32 group_box[ 3 ] = { OBJECT_GROUP, MAIN_BILL_GROUP, MAIN_COMP_GROUP };
+	SINT32 i;
+		for( actp = ap_start; actp != NULL; actp = actp->next )
+			for( i = 0; i < 3; i++ )
+				if( actp->task_group ==  group_box[ i ]  )
+					if( kawa_3d_hit_check( ap, actp ) != 0 )
+					{
+						ap->pos[ X ] = pos_x;
+						ap->pos[ Y ] = pos_y;
+						ap->pos[ Z ] = pos_z;
+						if( actp->task_group == MAIN_COMP_GROUP )
+							actp->work1[X] = 1;
+
+					}
+}
 
 //-----------------------------------------------------------------------------------------------------------------------
 //自機
@@ -294,49 +391,58 @@ void shot_move_jiki( TASK *ap )
 void jiki_exec( TASK *ap )
 {
 	FLOAT pos_x, pos_y, pos_z;
-	if( game_type != 501 )
+	pos_x = ap->pos[ X ];									//横の座標を保存
+	pos_y = ap->pos[ Y ];									//縦の座標を保存
+	pos_z = ap->pos[ Z ];									//前後の座標を保存
+	switch( ap->SCENE )
 	{
-		//ANGLE ang_y;
-		pos_x = ap->pos[ X ];									//横の座標を保存
-		pos_y = ap->pos[ Y ];									//縦の座標を保存
-		ap->work1[ Y ] = ap->angle[ Y ];							//
-		pos_z = ap->pos[ Z ];									//前後の座標を保存
-		ap->work1[ Y ] = ap->work1[ Y ] + 0x8000;					//32768( 180度 )回す( 目玉の名残
-		//ap->work1[Y] %= 0xffff;									//65535( 360度 )を超えないようにする
-		//ap->angle[Y] %= 0xffff;
-		ap->ang[ Y ] += 0xff;										//自機がくるくる回る
-		//SOZ_point_setting( ap );
+		case 0:													//ゲームオーバーの時
+			if( game_type != 501 )
+			{
+				//ANGLE ang_y;
+				
+				ap->work1[ Y ] = ap->angle[ Y ];							//
+				ap->work1[ Y ] = ap->work1[ Y ] + 0x8000;					//32768( 180度 )回す( 目玉の名残
+				ap->work1[Y] %= 0xffff;									//65535( 360度 )を超えないようにする
+				ap->angle[Y] %= 0xffff;
+				ap->ang[ Y ] += 0xff;										//自機がくるくる回る
 
-		shot_move_jiki( ap );									//ショットを出す
-		movement_get_key( ap );									//キーの移動
-		check_range_restriction( ap, pos_x, pos_y, pos_z );		//自機の移動範囲を制限する
+				shot_move_jiki( ap );									//ショットを出す
+				movement_get_key( ap );									//キーの移動
 
-		TASK *actp;
-		for( actp = ap_start; actp != NULL; actp = actp->next )
-			if( actp->task_group == OBJECT_GROUP || actp->task_group == MAIN_BILL_GROUP )
-				if( kawa_3d_hit_check( ap, actp ) != 0 )
-				{
-					ap->pos[ X ] = pos_x;
-					ap->pos[ Y ] = pos_y;
-					ap->pos[ Z ] = pos_z;
-				}
+				rp->pos[ X ] = ap->pos[ X ];
+				rp->pos[ Y ] = ap->pos[ Y ];
+				rp->pos[ Z ] = ap->pos[ Z ];
+				rp->ang[ X ] = ap->angle[ X ];
+				rp->ang[ Y ] = ap->work1[ Y ];
+			}
+			else
+			{
+				ap->pos[X] = rp->pos[X];
+				ap->pos[Y] = rp->pos[Y];
+				ap->pos[Z] = rp->pos[Z];
+				ap->work1[Y] = rp->ang[Y];
+				ap->angle[ X ] = rp->ang[X];
 
-		rp->pos[ X ] = ap->pos[ X ];
-		rp->pos[ Y ] = ap->pos[ Y ];
-		rp->pos[ Z ] = ap->pos[ Z ];
-		rp->ang[ X ] = ap->angle[ X ];
-		rp->ang[ Y ] = ap->work1[ Y ];
+				shot_move_jiki( ap );									//ショットを出す
+			}
+			check_range_restriction( ap, pos_x, pos_y, pos_z );		//自機の移動範囲を制限する
+			break;
+				
+		case 100:														//ゲームオーバー
+			specular_status_set( ap, 4.0f, 0.95f, 0.95f, 0.95f );
+			common_ambient( ap );
+			ap->ang[X] = 0x7000;
+			ap->pos[Y] -= ap->vec[Y];
+			ap->vec[Y] += 0.15f;
+			check_range_restriction( ap, pos_x, pos_y, pos_z );		//自機の移動範囲を制限する
+			if( ap->timer % 8 == 0 )
+				game_over_efe_start( ap->pos[X], ap->pos[Y], ap->pos[Z], ap->scale[X] );
+
+			break;
 	}
-	else
-	{
-		ap->pos[X] = rp->pos[X];
-		ap->pos[Y] = rp->pos[Y];
-		ap->pos[Z] = rp->pos[Z];
-		ap->work1[Y] = rp->ang[Y];
-		ap->angle[ X ] = rp->ang[X];
 
-		shot_move_jiki( ap );									//ショットを出す
-	}
+	object_hit_move_stop( ap, pos_x, pos_y, pos_z );		//当たると止まる当たり判定
 	
 
 	SOZ_locate_print( 2, 2, "xは%5f", ap->pos[X] );
@@ -351,9 +457,9 @@ void jiki_start( void )
 	TASK *ap;
 	ap = TASK_start_MODEL( jiki_exec, JIKI_GROUP, MODEL_JIKI, TEX_JIKI, "自機" );
 	ap->grp_mode =  TEST_ZBUFFER | WRITE_ZBUFFER  | NO_SHADOW | USE_LIGHTING | USE_SPECULAR;//| USE_2DMODEL_POS
-	ap->pos[X] = JIKI_X;	
-	ap->pos[Y] = JIKI_Y;	
-	ap->pos[Z] = JIKI_Z;	
+	ap->pos[X] = JIKI_X;
+	ap->pos[Y] = JIKI_Y;
+	ap->pos[Z] = JIKI_Z + 100.0f;
 	specular_status_set( ap, 2.0f, 1.3f,1.3f,1.3f );
 	ap->scale[X] = 0.5f;
 	ap->scale[Y] = ap->scale[X];

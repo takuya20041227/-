@@ -31,16 +31,23 @@ void title_return_exce( TASK *ap )
 
 	if( flag == TRUE )								//フラグが立っていたら
 	{
-		if( game_type == 111 )						//ゲームタイプがクリア画面なら
+		if( game_type == GAME_CLERE + 1 )						//ゲームタイプがクリア画面なら
+		{
 			if( score > hi_score )					//スコアがハイスコアを超えていたら
 			{
 				hi_score = score;					//ハイスコアを更新
 				select_and_page_write( "data/hi_score_data.bn", &hi_score );	//ハイスコアを保存
 			}
-
-		game_type = 10;								//タイトルに戻る
-		TASK_all_init();							//タスクを全て消す
-		return;										//
+				game_type = TITLE_SCENE;								//タイトルに戻る
+				TASK_all_init();							//タスクを全て消す
+				return;										//
+		}
+		else if( game_type == GAME_OVER + 1 )
+		{
+			shut_down_start();
+			TASK_end( ap );
+			return;
+		}
 	}
 }
 

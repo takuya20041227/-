@@ -12,3 +12,5 @@ extern PARTS_RECT game_goal_rect[];				//クリア条件の文字
 extern PARTS_RECT title_proposal_rect[];		//タイトルでゲームへのスタート条件を説明
 extern PARTS_RECT number_rect[];				//数字の矩形
 extern PARTS_RECT clear_rect[];					//クリア文字の矩形
+extern PARTS_RECT flower_rect[];				//花の矩形
+extern PARTS_RECT resurt_rect[];				//結果を画面に表示させる

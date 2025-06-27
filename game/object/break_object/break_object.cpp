@@ -23,28 +23,34 @@ SINT32 object_id = 1;									//ユニークナンバーを計測するのに使う( 初期化必須 )
 void attack_hit_check( TASK *ap, OBJECT_DATA *op )
 {
 	TASK *actp;
+	SINT32 group_box[ 3 ] = { MAIN_BILL_GROUP, MAIN_COMP_GROUP };
+	SINT32 i;
 	for( actp = ap_start; actp != NULL; actp = actp->next )
 		if( jiki_hit_check( ap, actp ) != 0 )			//今回は直接ヒット確認する
-			if( actp->task_group == MAIN_BILL_GROUP )
-			{
-				actp->HP -= ap->ATK;
-				score += op->score;
-				switch( op->object_group )
+			for( i = 0; i < 2; i++ )
+				if( actp->task_group == group_box[ i ] )
 				{
-					case CAR_GROUP:
-						SOZ_play_se( SE_BILL_BREAK, op->se_vol, 1, 1.0f );
-						break;
+					actp->HP -= ap->ATK;
+					score += op->score;
+					switch( op->object_group )
+					{
+						case CAR_GROUP:
+							SOZ_play_se( SE_BILL_BREAK, op->se_vol, 1, 1.0f );
+							break;
 
+						default:
+							SOZ_play_se( op->se_no, op->se_vol, 1, 1.0f );
+							break;
+					}
 
-					default:
-						SOZ_play_se( op->se_no, op->se_vol, 1, 1.0f );
-						break;
+					if( ap->ID == 20 )
+						alien_start( ap->fwork1[X], ap->fwork1[Y], ap->fwork1[Z], ap->ang[X], ap->angle[Y], ap->scale[X], ap->fwork8[X], ap->fwork8[Y], ap->ID );
+
+					beam_bom_start( ap->pos[X], ap->pos[Y], ap->pos[Z], F_Rand2( 3.0f, 6.0f ) );
+					hit_particle_occurrence( ap );
+					TASK_end( ap );
+					return;
 				}
-				beam_bom_start( ap->pos[X], ap->pos[Y], ap->pos[Z], F_Rand2( 3.0f, 6.0f ) );
-				hit_particle_occurrence( ap );
-				TASK_end( ap );
-				return;
-			}
 }
 
 
@@ -103,6 +109,7 @@ void break_object_start( DEFAULT_ARGUMENT, FLOAT atk, SINT32 id )
 	ap->grp_mode =  op->grp_flag;	//フラグを入れる
 	specular_sturct_set( ap, op );	//光に関するステータスを入れる
 	common_ambient( ap );
+	scale_all_chenge( ap, op->scale );
 	ap->emissive[0] = 0.35f;
 	ap->emissive[1] = 0.35f;
 	ap->emissive[2] = 0.35f;

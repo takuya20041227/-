@@ -22,12 +22,183 @@ PRIM_POLY3D_TEX title_logo[]=		//タイトルロゴを
 	{   2048.0f, 1024.0f,  0.0f, 0xffffffff,  1.0f, 1.0f },
 };
 
+PARTS_RECT tutorial_rect[]=
+{
+	{ 1024, 352, 624, 80, 312, 40 },
+	{ 1024,  80, 656, 80, 328, 40 },
+	{ 1024, 160, 832, 80, 416, 40 },
+	{   16, 688,1088, 80, 544, 40 },
+	{ 1024, 256, 880, 80, 440, 40 },
+};
+
+PARTS_RECT feedback_rect[]=
+{
+	{   17,   801,   158,    62,    79,    31},						//ナイス
+	{  225,   785,   286,    78,   143,    39},						//パーフェクト
+};
+
+
+void feedback_exec(TASK *ap)
+{
+	ap->TIMER++;
+	alpha_chenge( ap, 0xff, 0xa0 );
+	if( ap->TIMER > TIME_S * 8 )
+	{
+		TASK_end( ap );
+		return;
+	}
+}
+
+void feedback_start( SINT32 anime_no )
+{
+	TASK *ap;
+	ap = TASK_start_GRP( feedback_exec, FEED_BACK_GROUP, TEX_UI_FONT, feedback_rect, anime_no, "肯定表現" );
+	ap->pos[X] = WINDOW_WIDTH_HALF;
+	ap->pos[Y] = WINDOW_HEIGHT_HALF;
+	ap->scale[X] = 1.5f;
+	ap->scale[Y] = ap->scale[X];
+	ap->pri = UI_PRI * WP;
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------
+//チュートリアルの流れ
+//------------------------------------------------------------------------------------------------------------------------------------------------------
+void scene_font_drawfunc( TASK *ap )											//描画のみ
+{
+	TASK spr;
+	TASK_init_member_pointer( &spr );						//まずはタスクメモリの初期化
+	spr.base_color[0][0] = ap->base_color[0][0];
+	spr.tex_no = TEX_UI_FONT;
+	spr.uv_rect = tutorial_rect;
+	spr.anime_no = ap->anime_no;
+	spr.scale[X] = 1.5f;
+	spr.scale[Y] = spr.scale[X];
+	spr.pos[X] = ap->pos[X];
+	spr.pos[Y] = ap->pos[Y];
+	spr.pri = ap->pri;
+	SOZ_sprite_draw( &spr );										//最終的にここで描画する
+}
+
+void scene_font_exec( TASK *ap )
+{
+	SINT32 flag, anime_no;
+	ANGLE ang;
+	FLOAT vec_x, vec_y;
+	flag = 0;
+	anime_no = 0;
+	alpha_chenge( ap, 0xff, 0xa0 );
+	switch( ap->SCENE )
+	{
+		case 0:											//移動した時
+			if( push_flag != 0 )						//移動キーを押したことがわかったら
+			{
+				ap->SCENE = 100;
+				flag = 1;
+			}
+			break;
+
+		case 100:										//ビームを打つ時
+			ap->anime_no = 1;
+			if( SOZ_Mouse_Button( 0 ) == 1 )
+			{
+				ap->SCENE = 200;
+				flag = 1;
+			}
+			break;
+
+		case 200:										//物を掴め
+			ap->anime_no = 2;
+			if( catch_switch != 0 )
+			{
+				ap->SCENE = 300;
+				flag = 1;
+			}
+			break;
+
+		case 300:										//投げろ
+			ap->anime_no = 3;
+			if( catch_switch == 0 )
+			{
+				ap->SCENE = 400;
+				anime_no = 1;							//パーフェクト
+				flag = 1;
+			}
+			break;
+
+		case 400:
+			ap->anime_no = 4;
+			ap->TIMER++;
+			if( ap->TIMER > TIME_S * 10 )
+			{
+				TASK_end( ap );
+				return;
+			}
+			break;
+	}
+
+	if( flag != 0 )
+	{
+	TASK_end_group( FEED_BACK_GROUP );
+		feedback_start( anime_no );
+		for( ang = 0x0; ang < 0x10000; ang += 0x1000 )
+		{
+			vec_x = SOZ_get_sin( ang ) * 25.0f;
+			vec_y = SOZ_get_cos( ang ) * 25.0f;
+			flower_start( WINDOW_WIDTH_HALF, WINDOW_HEIGHT_HALF, 0.0f, vec_x, vec_y, 0.0f, 0 );
+		}
+	}
+}
+
+void scene_font_start( void )
+{
+	TASK *ap;
+	ap = TASK_start_DRAWFUNC( scene_font_exec, scene_font_drawfunc, NO_GROUP, "説明フォントだす" );
+	ap->pos[X] = WINDOW_WIDTH_HALF;
+	ap->pos[Y] = WINDOW_HEIGHT_HALF + 128;
+	ap->anime_no = 0;
+	ap->pri = UI_PRI * WP;
+}
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------
 //タイトルロゴの表示
 //------------------------------------------------------------------------------------------------------------------------------------------------------
-void title_logo_drawfunc( TASK *ap )
+void title_logo_exec( TASK *ap )
+{
+	SINT32 push, i;
+	push = 0;
+	if( SOZ_Inkey_TRG( DIK_Z ) != 0 )
+		push = 1;
+
+	for( i = 0; i < 3; i++ )
+		if( SOZ_Inkey_TRG( i ) != 0 )
+			push = 1;
+
+	if( push != 0 )
+	{
+		game_type = 10;				//チュートリアル
+		TASK_all_init();
+		return;
+	}
+}
+
+void title_logo_start( void )
+{
+	TASK *ap;
+	ap = TASK_start_GRP( title_logo_exec, NO_GROUP, TEX_TITLE, logo_rect, 0, "タイトルロゴ" );
+	ap->pos[X] = WINDOW_WIDTH_HALF;
+	ap->pos[Y] = 400.0f;
+	ap->scale[X] = 0.6f;
+	ap->scale[Y] = ap->scale[X]; 
+	ap->pri = 999 * WP;
+	ap->exe_pri = 0;
+	
+}
+
+
+#if 0
+/*void title_logo_drawfunc( TASK *ap )
 {
 	SOZ_set_model_param( ZBUF_TEST | ZBUF_WRITE, BILINEAR_ON, LIGHTING_OFF, SPECULAR_OFF );
 	SOZ_ResetClipping();
@@ -41,11 +212,9 @@ void title_logo_drawfunc( TASK *ap )
 	SOZ_render_start();
 	SOZ_primitive_draw( D3DPT_TRIANGLESTRIP, 2, title_logo, sizeof( PRIM_POLY3D_TEX ), FVF_POLY3D_TEX );
 	SOZ_render_end();
-}
+}*/
 
-void title_logo_exec( TASK *ap )
-{
-	SINT32 i;										//for分用の変数
+/*SINT32 i;										//for分用の変数
 	FLOAT sa, abs_sa;								//絶対値を求める
 	FLOAT pos_box[6][2] =							//座標の保存の配列
 	{
@@ -106,28 +275,12 @@ void title_logo_exec( TASK *ap )
 		ap->fwork2[Y] = camera_y[0];				//カメラの縦を保存
 		ap->fwork2[Z] = camera_z[0];				//カメラの前後を保存
 	}
-
-	
-}
-
-void title_logo_start( void )
-{
-	TASK *ap;
-	ap = TASK_start_GRP( title_logo_exec, NO_GROUP, TEX_TITLE, logo_rect, 0, "タイトルロゴ" );
-	ap->pos[X] = WINDOW_WIDTH_HALF;
-	ap->pos[Y] = 400.0f;
-	ap->scale[X] = 0.6f;
-	ap->scale[Y] = ap->scale[X]; 
-	ap->fwork1[X] = jiki->pos[X];		//自機の横を保存
-	ap->fwork1[Y] = jiki->pos[Y];		//自機の縦を保存
-	ap->fwork1[Z] = jiki->pos[Z];		//自機の前後を保存
-	ap->pri = 999 * WP;
-	ap->exe_pri = 0;
-	
-}
+	*/
 
 
-#if 0
+
+
+
 //------------------------------------------------------------------------------------------------------------------------------------------------------
 //タイトルロゴのポリゴンの値をセットする
 //------------------------------------------------------------------------------------------------------------------------------------------------------

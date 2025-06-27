@@ -174,6 +174,23 @@ void case_object_efe_model( TASK *ap, OBJECT_DATA *op  )
 			//何もしない
 			break;
 	}
+
+	if( ap->ID == 21 || ap->ID == 10 || ap->ID == 11 || ap->ID == 23 )						//アームメカなら
+	{
+		r_model = Rand2( 0, 100 );
+		if( r_model % 2 == 0 )
+			ap->tex_no = TEX_GEAR;
+		else
+		{
+			ap->tex_no = TEX_GEAR_GRY;
+			if( r_model > 50 )
+				ap->tex_no = TEX_GEAR_RED;
+		}
+		ap->pow = 1.5f;
+		ap->specular[0] = 2.75f;
+		ap->specular[1] = 2.75f;
+		ap->specular[2] = 2.75f;
+	}
 }
 
 //--------------------------------------------------------------------------------
@@ -266,8 +283,8 @@ void break_effect_start( OBJECT_DATA * op, DEFAULT_ARGUMENT, FLOAT acc_y, FLOAT 
 	ap->ang_spd[Y] = Rand2( -0x400, 0x400 );
 	ap->ang_spd[Z] = Rand2( -0x400, 0x400 );
 	ap->sphire = sphire;
-	case_object_efe_model( ap, op );					//場合によってはモデルを変える
 	ap->ID = id;
+	case_object_efe_model( ap, op );					//場合によってはモデルを変える
 	ap->pri = OBJECT_PRI * WP;
 }
 
@@ -342,7 +359,7 @@ void effect_case( OBJECT_DATA * op, DEFAULT_ARGUMENT, FLOAT sphire, SINT32 id )
 	{
 		case 18:
 			cat_effect_start( op, x, y, z, vec_x, vec_y, vec_z, 0.65f, sphire, id );
-			break;
+			break; 
 
 		default:
 			break_effect_start( op, x, y, z, vec_x, vec_y, vec_z, 0.25f, sphire, id );

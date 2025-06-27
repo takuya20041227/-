@@ -144,9 +144,7 @@ void object_start( FLOAT x, FLOAT y, FLOAT z, ANGLE ang_x, ANGLE ang_y, FLOAT sc
 	ap->vec[Z] = 0.0f;				//ベクトル
 	ap->ang[X] = ang_x;				//角度
 	ap->ang[Y] = ang_y;				//角度
-	ap->scale[X] = scale;			//大きさ
-	ap->scale[Y] = scale;			//大きさ
-	ap->scale[Z] = scale;			//大きさ
+	scale_all_chenge( ap, op->scale );
 	common_ambient( ap );
 	ap->GROUP  = op->object_group;	//どのグループか伝える
 	ap->HP  = ( SINT32 )( op->hp * hp );	//ヒットポイント
@@ -273,4 +271,110 @@ void heri_start( FLOAT x, FLOAT y, FLOAT z, ANGLE ang_x, ANGLE ang_y, FLOAT scal
 	actp->parent = ap;
 	actp->pri = OBJECT_PRI * WP;
 	ap->child[ 0 ] = actp;
+}
+
+
+void ang_hit_smile( TASK *ap )
+{
+	ANGLE ang, angle;
+	FLOAT sa_x, sa_z, all_sa;
+	sa_x = sa_return( ap->pos[X], jiki->pos[X] );
+	sa_z = sa_return( ap->pos[Z], jiki->pos[Z] );
+	all_sa = sa_x + sa_z;
+	angle = ap->ang[Y] + 0xc000;								//モデルの見た目の実際の値が180度違ったため補正
+	if( all_sa < 5120.0f )
+	{
+		ang = SOZ_atan2( ap->pos[X], ap->pos[Z], jiki->pos[X], jiki->pos[Z] );
+		if( SOZ_angle_diff( angle, ang ) >= 0x400 )
+			ap->ang[Y] += 0x100;
+		else if( SOZ_angle_diff( angle, ang ) <= -0x400 )
+			ap->ang[Y] -= 0x100;
+	}
+	else
+	{
+		if( SOZ_angle_diff( ap->ang[Y], ap->angle[Y] ) >= 0x200 )
+			ap->ang[Y] += 0x400;
+		else if( SOZ_angle_diff( ap->ang[Y], ap->angle[Y] ) <= -0x200 )
+			ap->ang[Y] -= 0x400;
+	}
+}
+
+
+void alien_exec( TASK *ap )
+{
+	SINT32 check;
+	FLOAT sa_x, sa_y, sa_z, all_sa;
+	OBJECT_DATA *op;												//オブジェクトのポインター
+	op = &object_data[ ap->ID ];									//アドレスを渡す
+	if( clear_flag != 0 )									//前の試合がゲームクリアなら
+		ap->tex_no = TEX_ALIEN_SMILE;						//笑顔の表情
+	else if( game_over_flag != 0 )							//前の試合がゲームオーバーなら
+		ap->tex_no = TEX_ALIEN_SAD;							//悲しい表情
+
+	if( jiki != NULL )
+		ang_hit_smile( ap );
+
+	check = 0;										//初期化
+	ap->sphire = sphire_get( ap );
+
+	check = no_hp_task_id_chenge( ap, op );
+	no_hp_move( ap, op, TIME_S * 15 );				//HPがなくなったとき
+	task_id_checge( ap, check );					//視錐台カリング
+	
+}
+
+void alien_start( FLOAT x, FLOAT y, FLOAT z, ANGLE ang_x, ANGLE ang_y, FLOAT scale, FLOAT hp, FLOAT atk,SINT32 id )
+{
+	TASK *ap;
+	OBJECT_DATA *op;												//オブジェクトのポインター
+	op = &object_data[ id ];										//アドレスを渡す
+	ap = TASK_start_MODEL( alien_exec, OBJECT_GROUP, op->model_no, op->tex_no,"ただのビル" );
+	ap->grp_mode =  op->grp_flag;									//フラグを入れる
+	ap->ID  = id;													//識別番号
+	sphire_set_case( ap );											//スフィアをいれる
+	specular_sturct_set( ap, op );									//光に関するステータスを入れる
+	ap->pos[X] = x;													//座標
+	ap->pos[Y] = y;													//座標
+	ap->pos[Z] = z;													//座標
+	ap->vec[X] = 0.0f;												//ベクトル
+	ap->vec[Y] = 20.0f;												//ベクトル
+	ap->vec[Z] = 0.0f;												//ベクトル
+	ap->ang[X] = ang_x;												//角度
+	ap->ang[Y] = ang_y;												//角度
+	ap->angle[Y] = ap->ang[Y];										//角度を保存しておく
+	scale_all_chenge( ap, op->scale );
+	common_ambient( ap );
+	ap->GROUP  = op->object_group;									//どのグループか伝える
+	ap->HP  = ( SINT32 )( op->hp * hp );							//ヒットポイント
+	ap->ATK = ( SINT32 )( op->atk * atk );							//攻撃力
+	ap->fwork8[X] = hp;												//HP倍率を保存しておく
+	ap->fwork8[Y] =	atk;											//一応ATK倍率も保存しておく
+	ap->pri = OBJECT_PRI * WP;										//描画優先度
+
+	ap->fwork1[X] = ap->pos[X];
+	ap->fwork1[Y] = ap->pos[Y];
+	ap->fwork1[Z] = ap->pos[Z];
+}
+
+
+void jiki_death_exec(TASK *ap)
+{
+	//if( ap->timer % 4 == 0 )
+	//	game_over_efe_start( ap->pos[X], ap->pos[Y], ap->pos[Z], ap->scale[X] / 2 );
+}
+
+
+void jiki_death_start( FLOAT x, FLOAT y, FLOAT z )
+{
+	TASK *ap;
+	ap = TASK_start_MODEL( jiki_death_exec, NO_GROUP, MODEL_JIKI, TEX_JIKI, "壊れた自機" );
+	ap->grp_mode =  TEST_ZBUFFER | WRITE_ZBUFFER  | NO_SHADOW | USE_LIGHTING;
+	ap->ambient[0] = 0.11f;
+	ap->ambient[1] = 0.11f;
+	ap->ambient[2] = 0.11f;
+	ap->ang[X] = 0x7000;
+	ap->pos[X] = x;
+	ap->pos[Y] = y + 32.0f * 15.0f;
+	ap->pos[Z] = z;
+	scale_all_chenge( ap, 15.0f );
 }

@@ -11,7 +11,10 @@ extern void timer_start( void );					//タイマー
 extern void icon_set( void );						//アイコンをセットする
 extern void icon_param_get( TASK *ap );				//アイコンの情報をいれる
 extern void icon_box_check_start( void );
-
+extern void scene_font_start( void );
 
 extern void socre_start( FLOAT x, FLOAT y, FLOAT scale, SINT32 *score_p );
 extern void title_return_start( SINT32 delay );
+extern void tutorial_skep_mane_start( void );
+
+extern FLOAT sa_return(FLOAT ap_average, FLOAT actp_average);

@@ -34,6 +34,19 @@
 #define	DEF				work8[Z]	//防御力
 #define	GROUP			work8[P]	//グループ
 #define	SWITCH			work8[D]	//なにかのスイッチ
+#define	SUB_SWITCH		work8[E]	//なにかのスイッチ
+
+//-----------------------------------------------------------------------------------------------------------------------
+//ワークのdefine
+//-----------------------------------------------------------------------------------------------------------------------
+#define	TITLE_SCENE				   5	//タイトル画面
+#define	TUTORIAL			  10	//チュートリアル画面
+#define	GAME				 100	//ゲーム本編
+#define	GAME_CLERE			 110	//ゲームクリア
+#define	GAME_OVER			 120	//ゲームオーバー
+#define	REPLYE				 500	//リプレイ
+#define	GAME_EDITORE		1000	//ゲーム画面のエディター
+#define	TUTORIAL_EDITORE	2000	//チュートリアルのエディター
 
 
 //-----------------------------------------------------------------------------------------------------------------------
@@ -82,6 +95,21 @@
 #define	TEX_CAT_GRY			45		//灰色のネコ
 #define	TEX_CAT_PEL			46		//ペールネコ
 #define	TEX_MISSILE			47		//ミサイル
+#define	TEX_FLOWER			48		//お花たち
+#define	TEX_ALIEN_NOMAL		49		//普通のエイリアン
+#define	TEX_ALIEN_SURPRISE	50		//驚いてるエイリアン
+#define	TEX_ALIEN_SMILE		51		//笑顔のエイリアン
+#define	TEX_ALIEN_SAD		52		//悲しい顔したエイリアン
+#define	TEX_DROP			53		//しずく
+#define	TEX_UFO_TABLE		54		//UFOの中の小物に色々つかっている
+#define	TEX_GEAR			57		//黄色の歯車( ギア )
+#define	TEX_GEAR_GRY		58		//灰色の歯車( ギア )
+#define	TEX_GEAR_RED		59		//赤色の歯車( ギア )
+#define	TEX_ALIEN_WEAPON	60		//エイリアンのピストル
+#define	TEX_UFO_FOOD		61		//飯のグラフィック
+#define	TEX_RAINDOW			62		//虹のグラフィック
+#define	TEX_GAME_OVER_EFE	63		//ゲームオーバーのエフェクト( 煙が飛ぶ )
+#define	TEX_ARCHER_FISH		64		//鉄砲魚
 
 
 //-----------------------------------------------------------------------------------------------------------------------
@@ -125,6 +153,14 @@
 #define	MODEL_CAT_MOUNTEN	36		//ネコ山
 #define	MODEL_CAT			38		//ネコ
 #define	MODEL_MISSILE		39		//ミサイル
+#define	MODEL_ALIEN			40		//エイリアン
+#define	MODEL_GEAR			41		//ギア
+#define	MODEL_UFO_TABLE		42		//UFOテーブル
+#define	MODEL_UFO_CHAIR		43		//UFOの中にある椅子
+#define	MODEL_ARM_MEKA		44		//アームの付いたメカ
+#define	MODEL_ALIEN_WEAPON	45		//エイリアンのピストル
+#define	MODEL_UFO_FOOD		46		//テーブルのエフェクト
+#define	MODEL_ARCHER_FISH	47		//
 
 
 //-----------------------------------------------------------------------------------------------------------------------
@@ -157,6 +193,8 @@
 #define	SHOT_GROUP			12		//ショットのグループ
 #define	BREAK_EFFECTS_GROUP	13		//飛び散るエフェクトのグループ
 #define	UI_GROUP			14		//UIのグループ
+#define	MAIN_COMP_GROUP		15		//メインコンピュータのグループ
+#define	FEED_BACK_GROUP		16		//ナイスやパーフェクト等を管理するグループ
 
 
 //-----------------------------------------------------------------------------------------------------------------------
@@ -175,4 +213,4 @@ extern	void car_start( FLOAT x, FLOAT y, FLOAT z, ANGLE ang_x, ANGLE ang_y, FLOA
 extern	void object_start( FLOAT x, FLOAT y, FLOAT z, ANGLE ang_x, ANGLE ang_y, FLOAT scale, FLOAT hp, FLOAT atk,SINT32 id );
 extern	void parking_start( FLOAT x, FLOAT y, FLOAT z, ANGLE ang_x, ANGLE ang_y, FLOAT scale, FLOAT hp, FLOAT atk, SINT32 id );
 extern	void heri_start( FLOAT x, FLOAT y, FLOAT z, ANGLE ang_x, ANGLE ang_y, FLOAT scale, FLOAT hp, FLOAT atk, SINT32 id );
-
+extern	void alien_start( FLOAT x, FLOAT y, FLOAT z, ANGLE ang_x, ANGLE ang_y, FLOAT scale, FLOAT hp, FLOAT atk,SINT32 id );

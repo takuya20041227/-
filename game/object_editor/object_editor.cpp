@@ -275,10 +275,6 @@ void object_set_case( TASK *ap )
 {
 	switch( ap->ID )
 	{
-		case 1:	case 8:case 9: case 10:case 11: case 12: case 13: case 14: case 15: case 18:			//ビル
-			object_start( ap->pos[X], ap->pos[Y], ap->pos[Z], ap->ang[X], ap->ang[Y], ap->scale[X], NO_HP, NO_ATK, ap->ID );
-			break;
-
 		case 2: case 3: case 4: case 5: case 6:	case 7: //テクスチャーの違う車たち
 			car_start( ap->pos[X], ap->pos[Y], ap->pos[Z], ap->ang[X], ap->ang[Y], ap->scale[X], NO_HP, NO_ATK, ap->ID );
 			break;
@@ -289,6 +285,14 @@ void object_set_case( TASK *ap )
 
 		case 17:
 			heri_start( ap->pos[X], ap->pos[Y], ap->pos[Z], ap->ang[X], ap->ang[Y], ap->scale[X], NO_HP, NO_ATK, ap->ID );
+			break;
+
+		case 20:
+			alien_start( ap->pos[X], ap->pos[Y], ap->pos[Z], ap->ang[X], ap->ang[Y], ap->scale[X], NO_HP, NO_ATK, ap->ID );
+			break;
+
+		default:
+			object_start( ap->pos[X], ap->pos[Y], ap->pos[Z], ap->ang[X], ap->ang[Y], ap->scale[X], NO_HP, NO_ATK, ap->ID );
 			break;
 	}
 }
@@ -630,6 +634,7 @@ void object_model_exec( TASK *ap )
 	ap->specular[1] = op->specular_g;						//スペキュラーの緑
 	ap->specular[2] = op->specular_b;						//スペキュラーの青
 	ap->grp_mode = op->grp_flag;							//グラフィック関係のフラグを立てる
+	scale_all_chenge( ap, op->scale );
 	ap->ID = id;				//IDを設定
 	model_ang_key( ap );									//キー入力で角度が変わる
 	model_movement_key( ap );								//キー移動させる
@@ -670,7 +675,7 @@ void object_editor_start( void )
 
 	ap->fwork1[X] = NORMAL_EDITOR_SPEED_X;					//左右移動のスピード
 	ap->fwork2[X] = NORMAL_EDITOR_SPEED_Z;					//前後移動のスピード
-
+	common_ambient( ap );
 	jiki = ap;												//こいつをカメラに追従させる　
 
 	actp = TASK_start( object_model_exec, OBJECT_GROUP, "モデルのオブジェクト" );

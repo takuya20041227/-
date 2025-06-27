@@ -128,26 +128,8 @@ SINT32 sa_check_smaller( FLOAT ap_value, FLOAT actp_value, FLOAT sa_max )
 }
 
 
-void catch_object( TASK *ap, TASK *actp )
-{
-	SINT32 i;
-	for( i = 0; i < 1024; i++ )
-		if( unique_box[ i ] == actp->unique_id )
-		{
-			actp->vec[ X ] = RESET;
-			actp->vec[ Y ] = RESET;
-			actp->vec[ Z ] = RESET;
-			actp->pos[ X ] = ap->pos[ X ];
-			actp->pos[ Y ] = ap->pos[ Y ];
-			actp->pos[ Z ] = ap->pos[ Z ];
-			actp->SWITCH = 1;				//これを立てるとメインビルに当たるようにする
-			icon_param_get(actp);			//譲歩をいれる
-			if( ap->SCENE == 20 )			//自機のところまで来ると
-				actp->task_id = TASK_PROGRAM;	//一時的にモデルの描画を辞める
 
-			return;
-		}
-}
+
 
 
 //-----------------------------------------------------------------------------------------------------------------------
@@ -184,14 +166,22 @@ SINT32 catch_check( TASK *ap )
 			{
 				unique_id_get( actp );
 				catch_switch = ON;
-				check = 1;
-			}
+				actp->vec[ X ] = RESET;
+				actp->vec[ Y ] = RESET;
+				actp->vec[ Z ] = RESET;
+				actp->pos[ X ] = ap->pos[ X ];
+				actp->pos[ Y ] = ap->pos[ Y ];
+				actp->pos[ Z ] = ap->pos[ Z ];
+				actp->SWITCH = 1;				//これを立てるとメインビルに当たるようにする
+				icon_param_get(actp);			//譲歩をいれる
+				if( ap->SCENE == 20 )			//自機のところまで来ると
+					actp->task_id = TASK_PROGRAM;	//一時的にモデルの描画を辞める
 
-			catch_object( ap, actp );
-				
-#if DEBUG	
-			op = &object_data[ actp->ID ];		//掴んでるモデルを見分けるために使う
-#endif	
+			}
+				check = 1;
+#if DEBUG	op = &object_data[ actp->ID ];	
+#endif	//掴んでるモデルを見分けるために使う
+
 		}
 
 	return check;

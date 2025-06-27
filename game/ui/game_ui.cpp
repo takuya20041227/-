@@ -159,7 +159,7 @@ void timer_exec( TASK *ap )
 	}
 #endif
 
-	if( game_type == 101 )											//ゲーム中なら
+	if( game_type == GAME + 1 )											//ゲーム中なら
 	{
 		SINT32 color_gb_box[ 2 ] = {0xff, 0x60};					//緑と青の値
 		ap->TIMER++;												//フレームを計測

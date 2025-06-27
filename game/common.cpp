@@ -29,10 +29,7 @@ void specular_status_set( TASK *ap, FLOAT pow, FLOAT sp_r, FLOAT sp_g, FLOAT sp_
 //-------------------------------------------------------------
 void specular_sturct_set( TASK *ap, OBJECT_DATA * op )
 {
-	ap->pow = op->pow;						//光の影響をどれくらい受けるかの設定
-	ap->specular[0] = op->specular_r;		//スペキュラーの赤を設定
-	ap->specular[1] = op->specular_g;		//スペキュラーの緑を設定
-	ap->specular[2] = op->specular_b;		//スペキュラーの青を設定
+	specular_status_set( ap, op->pow, op->specular_r, op->specular_g, op->specular_b );
 }
 
 
@@ -271,6 +268,17 @@ void alpha_chenge( TASK *ap, SINT32 alp_max, SINT32 alp_min )
 }
 
 
+//-------------------------------------------------------------------------------------------------------------------------------
+//範囲の外に出たら値を返す
+//-------------------------------------------------------------------------------------------------------------------------------
+SINT32 not_range( FLOAT min, FLOAT max )
+{
+	if( min < max )
+		return 1;
+
+	return 0;
+}
+
 
 //-------------------------------------------------------------------------------------------------------------------------------
 //距離に応じて音量を変える
@@ -340,4 +348,13 @@ void common_ambient( TASK *ap )
 	ap->ambient[1] = 0.31f;
 	ap->ambient[2] = 0.31f;
 	ap->ambient[3] = 1.0f;
+}
+
+
+
+void scale_all_chenge( TASK *ap, FLOAT scale )
+{
+	ap->scale[X] = scale;
+	ap->scale[Y] = ap->scale[X];
+	ap->scale[Z] = ap->scale[Y];
 }

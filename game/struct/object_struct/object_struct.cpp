@@ -19,27 +19,31 @@
 OBJECT_SPHIRE	object_sphire[ OBJ_MAX ];				//当たり判定の実装
 OBJECT_DATA		object_data[ OBJ_MAX ]=					//オブジェクトのデータ
 {
-/*00*/{/*     name			   group		model_no			tex_no				break_model_no		break_tex_no		grp_flag			pow		specular_r	specular_g specular_b  hp	 atk	エフェクトの数	エフェクトのモデル  エフェクトのテクスチャー	効果音			音量	フラグ			アイコン	スコア*/},
-/*01*/{"ただのビル"			, BILL_GROUP,	MODEL_SUB_BILL,		TEX_BILL,			MODEL_BLEAK_BILL,	TEX_BILL,			SUB_BILL_GRP_FLAG,  4.6f,		1.3f,      1.3f,    1.3f,		260, 4500,		16,			MODEL_BILL_EFE,		TEX_BILL_EFE,				SE_BILL_BREAK,	1.7f,	NO_FLAG			,	1,		10000	},
-/*02*/{"緑の車"				, CAR_GROUP,	MODEL_CAR,			TEX_CAR,			MODEL_CAR,			TEX_CAR,			CAR_GRP_FLAG,		1.0f,       1.3f,      1.3f,    1.3f,		260, 3800,		 4,			MODEL_CAR_EFE,		TEX_CAR_EFE ,				SE_KLAXON_1,	1.0f,	CAR_FLAG		,	3,		13000	},
-/*03*/{"黒の車"				, CAR_GROUP,	MODEL_CAR,			TEX_CAR_B,			MODEL_CAR,			TEX_CAR_B,			CAR_GRP_FLAG,		1.0f,       1.3f,      1.3f,    1.3f,		260, 3500,		 4,			MODEL_CAR_EFE,		TEX_CAR_EFE ,				SE_KLAXON_1,	1.0f,	CAR_FLAG		,	3,		13000	},
-/*04*/{"白の車"				, CAR_GROUP,	MODEL_CAR,			TEX_CAR_W,			MODEL_CAR,			TEX_CAR_W,			CAR_GRP_FLAG,		1.0f,       1.3f,      1.3f,    1.3f,		260, 3500,		 4,			MODEL_CAR_EFE,		TEX_CAR_EFE ,				SE_KLAXON_1,	1.0f,	CAR_FLAG		,	3,		13000	},
-/*05*/{"赤スター"			, CAR_GROUP,	MODEL_ROADSTAR,		TEX_ROADSTAR_R,		MODEL_ROADSTAR,		TEX_ROADSTAR_R,		CAR_GRP_FLAG,		6.5f,       2.1f,      2.1f,    2.1f,		260, 3500,		 4,			MODEL_CAR_EFE,		TEX_CAR_EFE ,				SE_KLAXON_2,	1.0f,	CAR_FLAG		,	4,		15000	},
-/*06*/{"黒スター"			, CAR_GROUP,	MODEL_ROADSTAR,		TEX_ROADSTAR_B,		MODEL_ROADSTAR,		TEX_ROADSTAR_B,		CAR_GRP_FLAG,		6.5f,       2.1f,      2.1f,    2.1f,		260, 3500,		 4,			MODEL_CAR_EFE,		TEX_CAR_EFE ,				SE_KLAXON_2,	1.0f,	CAR_FLAG		,	4,		15000	},
-/*07*/{"白スター"			, CAR_GROUP,	MODEL_ROADSTAR,		TEX_ROADSTAR_W,		MODEL_ROADSTAR,		TEX_ROADSTAR_W,		CAR_GRP_FLAG,		4.6f,       1.9f,      2.1f,    1.9f,		260, 3500,		 4,			MODEL_CAR_EFE,		TEX_CAR_EFE ,				SE_KLAXON_2,	1.0f,	CAR_FLAG		,	4,		15000	},
-/*08*/{"謎のタワー"			, BILL_GROUP,	MODEL_TOWER,		TEX_TOWER,			MODEL_TOWER,		TEX_TOWER,			SUB_BILL_GRP_FLAG,	4.6f,       1.9f,      2.1f,    1.9f,		260, 3500,		 4,			MODEL_BILL_EFE,		TEX_BILL_EFE,				SE_BILL_BREAK,	2.0f,	ID_CHENGE_FLAG	,	2,		10000	},
-/*09*/{"テント"				, BILL_GROUP,	MODEL_TENTO,		TEX_TENTO,			MODEL_TENTO,		TEX_TENTO,			SUB_BILL_GRP_FLAG,	4.6f,       1.9f,      2.1f,    1.9f,		260, 3500,		 4,			MODEL_BILL_EFE,		TEX_BILL_EFE,				SE_BILL_BREAK,	2.0f,	ID_CHENGE_FLAG	,	11,		10000	},
-/*10*/{"モニター機械"		, MEKA_GROUP,	MODEL_SCREEN_MEKA,	TEX_SCREEN_MEKA,	MODEL_SCREEN_MEKA,	TEX_SCREEN_MEKA,	SUB_BILL_GRP_FLAG,	4.6f,       1.9f,      2.1f,    1.9f,		260, 3500,		 4,			NULL,				NULL,						SE_BILL_BREAK,	2.0f,	WOOD_FLAG		,	7,		0		},
-/*11*/{"ボタン付き機械"		, MEKA_GROUP,	MODEL_BUTTON_MEKA,	TEX_BUTTON_MEKA,	MODEL_BUTTON_MEKA,	TEX_BUTTON_MEKA,	SUB_BILL_GRP_FLAG,	4.6f,       1.9f,      2.1f,    1.9f,		260, 3500,		 4,			NULL,				NULL,						SE_BILL_BREAK,	2.0f,	WOOD_FLAG		,	6,		0		},
-/*12*/{"木"					, MEKA_GROUP,	MODEL_WOOD,			TEX_WOOD,			MODEL_WOOD_EFE,		TEX_WOOD_EFE,		SUB_BILL_GRP_FLAG,	4.6f,       1.9f,      2.1f,    1.9f,		260, 5000,		16,			MODEL_WOOD_EFE,		TEX_WOOD_EFE,				SE_BILL_BREAK,	2.0f,	WOOD_FLAG		,	8,		11000	},
-/*13*/{"カツオのオブジェ"	, FISH_GROUP,	MODEL_BONITO,		TEX_BONITO,			MODEL_BONITO,		TEX_BONITO,			SUB_BILL_GRP_FLAG,	4.6f,       1.9f,      2.1f,    1.9f,		260, 5500,		 8,			MODEL_BONITO,		TEX_BONITO	,				SE_FISH,		1.5f,	BONITO_FLAG		,	5,		15000	},
-/*14*/{"学校"				, SCHOOL_GROUP,	MODEL_SCHOOL,		TEX_SCHOOL,			MODEL_BREAK_SCHOOL,	TEX_SCHOOL,			SCHOOL_GRP_FLAG,	0.0f,       1.0f,      1.0f,    1.0f,		840, 6000,		32,			MODEL_BILL_EFE,		TEX_SCHOOL,					SE_BILL_BREAK,	2.0f,	NO_FLAG	,			12,		30000	},
-/*15*/{"ロゴのマンション"	, HOUSE_GROUP,	MODEL_LOGO_HOUSE,	TEX_LOGO_HOUSE,		MODEL_LOGO_HOUSE,	TEX_LOGO_HOUSE,		SCHOOL_GRP_FLAG,	0.0f,       1.0f,      1.0f,    1.0f,		840, 6000,		16,			MODEL_BILL_EFE,		TEX_SCHOOL,					SE_BILL_BREAK,	2.0f,	LOGO_HOUSE_FLAG	,	13,		20000	},
-/*16*/{"駐車場"				, HOUSE_GROUP,	MODEL_PARKING,		TEX_PARKING,		MODEL_PARKING,		TEX_PARKING,		MAIN_BILL_GRP_FLAG,	1.0f,       1.0f,      1.0f,    1.0f,		840, 5500,		16,			MODEL_BILL_EFE,		TEX_SCHOOL,					SE_BILL_BREAK,	2.0f,	LOGO_HOUSE_FLAG	,	1,		20000	},
-/*17*/{"ヘリ"				, HERI_GROUP,	MODEL_HERI,			TEX_HERI,			MODEL_HERI,			TEX_HERI,			MAIN_BILL_GRP_FLAG,	1.0f,       1.0f,      1.0f,    1.0f,		540, 6500,		 1,			MODEL_PROPELLER,	TEX_HERI,					SE_BILL_BREAK,	2.0f,	ID_CHENGE_FLAG	,	9,		20000	},
-/*18*/{"ネコ山"				, CAT_GROUP,	MODEL_CAT_MOUNTEN,	TEX_CAT_MOUNTEN,	MODEL_CAT_MOUNTEN,	TEX_CAT_MOUNTEN,	MAIN_BILL_GRP_FLAG,	1.0f,       1.0f,      1.0f,    1.0f,		1240, 8500,		 16,			MODEL_CAT,			TEX_CAT_GRY,				SE_BILL_BREAK,	2.0f,	ID_CHENGE_FLAG	,	10,		40000	},
-																																																																													
-/*18*/{"メインビル"			, BILL_GROUP,	MODEL_MAIN_BILL,	TEX_BILL,			MODEL_MAIN_BILL,	TEX_BILL,			SUB_BILL_GRP_FLAG,	4.6f,       1.9f,      2.1f,    1.9f,		40,  1800,		 4,			MODEL_BILL_EFE,		TEX_BILL_EFE,				SE_BILL_BREAK,	2.0f,	NO_FLAG			,	1,		1000	},
+/*00*/{/*     name			   group			model_no			tex_no				break_model_no		break_tex_no		grp_flag			pow		specular_r	specular_g specular_b  hp	 atk	エフェクトの数	エフェクトのモデル  エフェクトのテクスチャー	効果音			音量	フラグ				アイコン	スコア		大きさ*/	},
+/*01*/{"ただのビル"			, BILL_GROUP,		MODEL_SUB_BILL,		TEX_BILL,			MODEL_BLEAK_BILL,	TEX_BILL,			SUB_BILL_GRP_FLAG,  4.6f,		1.3f,      1.3f,     1.3f,		260, 4500,		16,			MODEL_BILL_EFE,		TEX_BILL_EFE,				SE_BILL_BREAK,	1.7f,	NO_FLAG			,		1,			10000,	1.0f	},
+/*02*/{"緑の車"				, CAR_GROUP,		MODEL_CAR,			TEX_CAR,			MODEL_CAR,			TEX_CAR,			CAR_GRP_FLAG,		1.0f,       1.3f,      1.3f,     1.3f,		260, 3800,		 4,			MODEL_CAR_EFE,		TEX_CAR_EFE ,				SE_KLAXON_1,	1.0f,	CAR_FLAG		,		3,			13000,	1.0f	},
+/*03*/{"黒の車"				, CAR_GROUP,		MODEL_CAR,			TEX_CAR_B,			MODEL_CAR,			TEX_CAR_B,			CAR_GRP_FLAG,		1.0f,       1.3f,      1.3f,     1.3f,		260, 3500,		 4,			MODEL_CAR_EFE,		TEX_CAR_EFE ,				SE_KLAXON_1,	1.0f,	CAR_FLAG		,		3,			13000,	1.0f	},
+/*04*/{"白の車"				, CAR_GROUP,		MODEL_CAR,			TEX_CAR_W,			MODEL_CAR,			TEX_CAR_W,			CAR_GRP_FLAG,		1.0f,       1.3f,      1.3f,     1.3f,		260, 3500,		 4,			MODEL_CAR_EFE,		TEX_CAR_EFE ,				SE_KLAXON_1,	1.0f,	CAR_FLAG		,		3,			13000,	1.0f	},
+/*05*/{"赤スター"			, CAR_GROUP,		MODEL_ROADSTAR,		TEX_ROADSTAR_R,		MODEL_ROADSTAR,		TEX_ROADSTAR_R,		CAR_GRP_FLAG,		6.5f,       2.1f,      2.1f,     2.1f,		260, 3500,		 4,			MODEL_CAR_EFE,		TEX_CAR_EFE ,				SE_KLAXON_2,	1.0f,	CAR_FLAG		,		4,			15000,	1.0f	},
+/*06*/{"黒スター"			, CAR_GROUP,		MODEL_ROADSTAR,		TEX_ROADSTAR_B,		MODEL_ROADSTAR,		TEX_ROADSTAR_B,		CAR_GRP_FLAG,		6.5f,       2.1f,      2.1f,     2.1f,		260, 3500,		 4,			MODEL_CAR_EFE,		TEX_CAR_EFE ,				SE_KLAXON_2,	1.0f,	CAR_FLAG		,		4,			15000,	1.0f	},
+/*07*/{"白スター"			, CAR_GROUP,		MODEL_ROADSTAR,		TEX_ROADSTAR_W,		MODEL_ROADSTAR,		TEX_ROADSTAR_W,		CAR_GRP_FLAG,		4.6f,       1.9f,      2.1f,     1.9f,		260, 3500,		 4,			MODEL_CAR_EFE,		TEX_CAR_EFE ,				SE_KLAXON_2,	1.0f,	CAR_FLAG		,		4,			15000,	1.0f	},
+/*08*/{"謎のタワー"			, BILL_GROUP,		MODEL_TOWER,		TEX_TOWER,			MODEL_TOWER,		TEX_TOWER,			SUB_BILL_GRP_FLAG,	4.6f,       1.9f,      2.1f,     1.9f,		260, 3500,		 4,			MODEL_BILL_EFE,		TEX_BILL_EFE,				SE_BILL_BREAK,	2.0f,	ID_CHENGE_FLAG	,		2,			10000,	1.0f	},
+/*09*/{"テント"				, BILL_GROUP,		MODEL_TENTO,		TEX_TENTO,			MODEL_TENTO,		TEX_TENTO,			SUB_BILL_GRP_FLAG,	4.6f,       1.9f,      2.1f,     1.9f,		260, 3500,		 4,			MODEL_BILL_EFE,		TEX_BILL_EFE,				SE_BILL_BREAK,	2.0f,	ID_CHENGE_FLAG	,		11,			10000,	1.0f	},
+/*10*/{"モニター機械"		, MEKA_GROUP,		MODEL_SCREEN_MEKA,	TEX_SCREEN_MEKA,	MODEL_SCREEN_MEKA,	TEX_SCREEN_MEKA,	SUB_BILL_GRP_FLAG,	4.6f,       1.9f,      2.1f,     1.9f,		260, 3500,		 4,			MODEL_GEAR,			TEX_GEAR_RED,				SE_BILL_BREAK,	2.0f,	WOOD_FLAG		,		7,			0	 ,	1.0f	},
+/*11*/{"ボタン付き機械"		, MEKA_GROUP,		MODEL_BUTTON_MEKA,	TEX_BUTTON_MEKA,	MODEL_BUTTON_MEKA,	TEX_BUTTON_MEKA,	SUB_BILL_GRP_FLAG,	4.6f,       1.9f,      2.1f,     1.9f,		260, 3500,		 4,			MODEL_GEAR,			TEX_GEAR_RED,				SE_BILL_BREAK,	2.0f,	WOOD_FLAG		,		6,			0	 ,	1.0f	},
+/*12*/{"木"					, MEKA_GROUP,		MODEL_WOOD,			TEX_WOOD,			MODEL_WOOD_EFE,		TEX_WOOD_EFE,		SUB_BILL_GRP_FLAG,	4.6f,       1.9f,      2.1f,     1.9f,		260, 5000,		16,			MODEL_WOOD_EFE,		TEX_WOOD_EFE,				SE_BILL_BREAK,	2.0f,	WOOD_FLAG		,		8,			11000,	1.0f	},
+/*13*/{"カツオのオブジェ"	, FISH_GROUP,		MODEL_BONITO,		TEX_BONITO,			MODEL_BONITO,		TEX_BONITO,			SUB_BILL_GRP_FLAG,	4.6f,       1.9f,      2.1f,     1.9f,		260, 5500,		 8,			MODEL_BONITO,		TEX_BONITO	,				SE_FISH,		1.5f,	BONITO_FLAG		,		5,			15000,	1.0f	},
+/*14*/{"学校"				, SCHOOL_GROUP,		MODEL_SCHOOL,		TEX_SCHOOL,			MODEL_BREAK_SCHOOL,	TEX_SCHOOL,			SCHOOL_GRP_FLAG,	0.0f,       1.0f,      1.0f,     1.0f,		840, 6000,		32,			MODEL_BILL_EFE,		TEX_SCHOOL,					SE_BILL_BREAK,	2.0f,	NO_FLAG	,				12,			30000,	1.0f	},
+/*15*/{"ロゴのマンション"	, HOUSE_GROUP,		MODEL_LOGO_HOUSE,	TEX_LOGO_HOUSE,		MODEL_LOGO_HOUSE,	TEX_LOGO_HOUSE,		SCHOOL_GRP_FLAG,	0.0f,       1.0f,      1.0f,     1.0f,		840, 6000,		16,			MODEL_BILL_EFE,		TEX_SCHOOL,					SE_BILL_BREAK,	2.0f,	LOGO_HOUSE_FLAG	,		13,			20000,	1.0f	},
+/*16*/{"駐車場"				, HOUSE_GROUP,		MODEL_PARKING,		TEX_PARKING,		MODEL_PARKING,		TEX_PARKING,		MAIN_BILL_GRP_FLAG,	1.0f,       1.0f,      1.0f,     1.0f,		840, 5500,		16,			MODEL_BILL_EFE,		TEX_SCHOOL,					SE_BILL_BREAK,	2.0f,	LOGO_HOUSE_FLAG	,		1,			20000,	1.0f	},
+/*17*/{"ヘリ"				, HERI_GROUP,		MODEL_HERI,			TEX_HERI,			MODEL_HERI,			TEX_HERI,			MAIN_BILL_GRP_FLAG,	1.0f,       1.0f,      1.0f,     1.0f,		540, 6500,		 1,			MODEL_PROPELLER,	TEX_HERI,					SE_BILL_BREAK,	2.0f,	ID_CHENGE_FLAG	,		9,			20000,	1.0f	},
+/*18*/{"ネコ山"				, CAT_GROUP,		MODEL_CAT_MOUNTEN,	TEX_CAT_MOUNTEN,	MODEL_CAT_MOUNTEN,	TEX_CAT_MOUNTEN,	MAIN_BILL_GRP_FLAG,	1.0f,       1.0f,      1.0f,     1.0f,		2240, 8500,		 16,		MODEL_CAT,			TEX_CAT_GRY,				SE_BILL_BREAK,	2.0f,	ID_CHENGE_FLAG	,		10,			40000,	1.0f	},
+/*19*/{"UFO"				, BILL_GROUP,		MODEL_JIKI,			TEX_JIKI,			MODEL_JIKI,			TEX_JIKI,			MAIN_BILL_GRP_FLAG,	1.3f,       2.0f,      2.0f,	 2.5f,		400, 8500,		 1,			MODEL_ALIEN,		TEX_ALIEN_SURPRISE,			SE_BILL_BREAK,	2.0f,	ID_CHENGE_FLAG	,		15,				0,	15.0f	},
+/*20*/{"宇宙人"				, UFO_ROOM_GROUP,	MODEL_ALIEN,		TEX_ALIEN_NOMAL,	MODEL_ALIEN,		TEX_ALIEN_SURPRISE,	MAIN_BILL_GRP_FLAG,	2.0f,       0.95f,     0.95f,   0.95f,		400, 8500,		 1,			MODEL_ALIEN_WEAPON,	TEX_ALIEN_WEAPON,			SE_BILL_BREAK,	2.0f,	ID_CHENGE_FLAG	,		15,				0,	4.0f	},
+/*21*/{"アームメカ"			, BILL_GROUP,		MODEL_ARM_MEKA,		TEX_UFO_TABLE,		MODEL_ARM_MEKA,		TEX_UFO_TABLE,		MAIN_BILL_GRP_FLAG,	0.4f,       3.8f,		3.8f,	 4.0f,		800, 8500,		 6,			MODEL_GEAR,			TEX_GEAR,					SE_BILL_BREAK,	2.0f,	ID_CHENGE_FLAG	,		15,				0,	8.0f	},
+/*22*/{"タイトルテーブル"	, BILL_GROUP,		MODEL_UFO_TABLE,	TEX_UFO_TABLE,		MODEL_ARM_MEKA,		TEX_UFO_TABLE,		MAIN_BILL_GRP_FLAG,	0.4f,       3.8f,		3.8f,	 4.0f,		400, 8500,		 6,			MODEL_UFO_FOOD,		TEX_UFO_FOOD,				SE_BILL_BREAK,	2.0f,	ID_CHENGE_FLAG	,		15,				0,	5.0f	},
+/*23*/{"タイトル椅子"		, BILL_GROUP,		MODEL_UFO_CHAIR,	TEX_UFO_TABLE,		MODEL_UFO_CHAIR,	TEX_UFO_TABLE,		MAIN_BILL_GRP_FLAG,	0.4f,       3.8f,		3.8f,	 4.0f,		400, 8500,		 6,			MODEL_GEAR,			TEX_GEAR,					SE_BILL_BREAK,	2.0f,	ID_CHENGE_FLAG	,		15,				0,	5.0f	},
+/*24*/{"鉄砲魚"				, FISH_GROUP,		MODEL_ARCHER_FISH,	TEX_ARCHER_FISH,	MODEL_ARCHER_FISH,	TEX_ARCHER_FISH,	MAIN_BILL_GRP_FLAG,	1.0f,       1.8f,		1.8f,	 1.8f,		400, 2500,		 6,			MODEL_ARCHER_FISH,	TEX_ARCHER_FISH,			SE_BILL_BREAK,	2.0f,	ID_CHENGE_FLAG	,		15,				0,	1.0f	},
 };
 
 
@@ -49,7 +53,7 @@ void sphire_set_case( TASK *ap )
 	switch( ap->ID )
 	{
 		case 1:				//ただのビル
-			object_sphire_set( ap->ID, 0, 356.0f, 0.0f, 356.0f );		//スフィアのセット
+			object_sphire_set( ap->ID, 0, 356.0f,   0.0f, 356.0f );		//スフィアのセット
 			break;
 
 		case 8:
@@ -91,6 +95,18 @@ void sphire_set_case( TASK *ap )
 
 		case 18:			//ネコ山
 			object_sphire_set( ap->ID, 0, 2048.0f, 0.0f, 2048.0f );		//スフィアのセット
+			break;
+
+		case 20:
+			object_sphire_set( ap->ID, 0, 512.0f, 0.0f, 1024.0f );		//スフィアのセット
+			break;
+
+		case 21:
+			object_sphire_set( ap->ID, 0, 2048.0f, 0.0f, 0.0f );		//スフィアのセット
+			break;
+
+		default:
+			object_sphire_set( ap->ID, 0, 512.0f, 0.0f, 356.0f );		//スフィアのセット
 			break;
 	}
 
@@ -197,16 +213,20 @@ FLOAT sphire_point( TASK *ap, TASK *actp )
 FLOAT sphire_get( TASK *ap )
 {
 	FLOAT sa_z, sa_x, abs_sax, abs_saz;
-	sa_x = ap->pos[X] - jiki->pos[X]; 
-	sa_z = ap->pos[Z] - jiki->pos[Z];
-	abs_sax = ( FLOAT )fabs( ( DOUBLE )sa_x );			//絶対値を調べる
-	abs_saz = ( FLOAT )fabs( ( DOUBLE )sa_z );			//絶対値を調べる
-	//for( actp = ap_start; actp != NULL; actp = actp->next )
-	//	if( actp->task_group == SHOT_GROUP || actp->task_group == HAND_GROUP || actp->task_group == BREAK_OBJECT_GROUP )
-	//		if( sa_check_smaller( ap->pos[X], actp->pos[X], abs_sax ) != 0 && sa_check_smaller( ap->pos[Z], actp->pos[Z], abs_saz ) != 0 )		//距離が自機より小さかったら
-	//			return sphire_point( actp, ap );		//ビームの距離でスフィアを返す
+	if( jiki != NULL )
+	{
+		sa_x = ap->pos[ X ] - jiki->pos[ X ];
+		sa_z = ap->pos[ Z ] - jiki->pos[ Z ];
+		abs_sax = (FLOAT)fabs((DOUBLE)sa_x);			//絶対値を調べる
+		abs_saz = (FLOAT)fabs((DOUBLE)sa_z);			//絶対値を調べる
 
-	return sphire_point( jiki, ap );					//自機の距離でスフィアを返す
+		//for( actp = ap_start; actp != NULL; actp = actp->next )
+		//	if( actp->task_group == SHOT_GROUP || actp->task_group == HAND_GROUP || actp->task_group == BREAK_OBJECT_GROUP )
+		//		if( sa_check_smaller( ap->pos[X], actp->pos[X], abs_sax ) != 0 && sa_check_smaller( ap->pos[Z], actp->pos[Z], abs_saz ) != 0 )		//距離が自機より小さかったら
+		//			return sphire_point( actp, ap );		//ビームの距離でスフィアを返す
+
+		return sphire_point(jiki, ap);					//自機の距離でスフィアを返す
+	}
 }
 
 
@@ -286,6 +306,10 @@ SINT32 sphire_hit_check( TASK *ap, TASK *actp )
 	FLOAT sa_x, sa_y, sa_z;																		//互いの差を測る
 	FLOAT length;																				//その差からレングスを出す
 	FLOAT sphire_pos_y, min_hight;																//使うスフィアの座標を入れる
+
+	if( actp->sphire == 0 || ap->sphire == 0 )
+		return 0;
+
 	sa_x = ap->pos[X] - actp->pos[X];															//横の差を調べる
 	sa_y = ap->pos[Y] - actp->pos[Y];														//縦の差を調べる
 	sa_z = ap->pos[Z] - actp->pos[Z];															//前後の差を調べる

@@ -28,12 +28,12 @@ void sub_parts_exec( TASK *ap )
 void main_computer_exec( TASK *ap )
 {
 	ap->sphire = sphire_get( ap );
-	if( ap->HP < 0 )
+	if( ap->work1[X] != 0 )											//自機とぶつかったら0以外になる	
 	{
 		tex_title_reset();                                          //タイトルでしか使ってないテクスチャーを消去
         model_title_reset();                                        //タイトルでしか使ってないモデルを消去
 		game_type = 100;
-		record_fram = 0;
+		record_fram = 0;											//レコードのフレームを初期化する
 		TASK_all_init();
 		return;
 	}
@@ -42,7 +42,7 @@ void main_computer_exec( TASK *ap )
 void main_computer_start( void )
 {
 	TASK *ap, *op, *ep;		//親と輪っかと地球
-	ap = TASK_start_MODEL( main_computer_exec, MAIN_BILL_GROUP, MODEL_COMPUTER, TEX_COMPUTER, "機械" );		//メインの機械
+	ap = TASK_start_MODEL( main_computer_exec, MAIN_COMP_GROUP, MODEL_COMPUTER, TEX_COMPUTER, "機械" );		//メインの機械
 	ap->grp_mode = MAIN_BILL_GRP_FLAG;
 	ap->ID = OBJ_MAX - 2;						//メインビルの一つ前に設定しておく
 	object_sphire_set( ap->ID, 0, 3024.0f, 0.0f, 1024.0f );
@@ -55,7 +55,7 @@ void main_computer_start( void )
 	ap->pri = OBJECT_PRI * WP;
 	common_ambient( ap );
 	
-	op = TASK_start_MODEL( sub_parts_exec, OBJECT_GROUP, MODEL_SUB_PARTS, TEX_COMPUTER, "輪っか" );		//
+	op = TASK_start_MODEL( sub_parts_exec, MAIN_COMP_GROUP, MODEL_SUB_PARTS, TEX_COMPUTER, "輪っか" );		//
 	op->grp_mode = MAIN_BILL_GRP_FLAG;
 	op->ang_spd[Y] = -0xc0;
 	op->pos[ X ] = ap->pos[X];
@@ -64,7 +64,7 @@ void main_computer_start( void )
 	common_ambient( op );
 	//op->pri = -1 * WP;
 
-	op = TASK_start_MODEL( sub_parts_exec, OBJECT_GROUP, MODEL_SUB_PARTS, TEX_COMPUTER, "輪っか" );		//
+	op = TASK_start_MODEL( sub_parts_exec, MAIN_COMP_GROUP, MODEL_SUB_PARTS, TEX_COMPUTER, "輪っか" );		//
 	op->grp_mode = MAIN_BILL_GRP_FLAG;
 	op->ang_spd[Y] = 0xc0;
 	op->pos[ X ] = ap->pos[X];
@@ -73,7 +73,7 @@ void main_computer_start( void )
 	op->pri = -1 * WP;
 	common_ambient( op );
 
-	ep = TASK_start_MODEL( earth_exec, OBJECT_GROUP, MODEL_EARTH, TEX_EARTH, "地球" );		//地球
+	ep = TASK_start_MODEL( earth_exec, MAIN_COMP_GROUP, MODEL_EARTH, TEX_EARTH, "地球" );		//地球
 	ep->grp_mode = TEST_ZBUFFER | WRITE_ZBUFFER  | NO_SHADOW	 | USE_LIGHTING;
 	if( clear_flag != 0 )
 		ep->tex_no = TEX_EARTH_BREAK;
@@ -89,6 +89,7 @@ void main_computer_start( void )
 	//ep->emissive[1] = 5.0f;
 	//ep->emissive[2] = 5.0f;
 	ep->diffuse[0]  = 0x40;
+	ep->sphire = 1524.0f;
 }
 
 
@@ -115,6 +116,7 @@ void score_board_drawfunc( TASK *ap )
 		spr.scale[ Y ] = spr.scale[ X ];						//大きさを設定
 		spr.tex_no = TEX_UI_FONT;								//テクスチャナンバーは自分のヤツ
 		spr.uv_rect = number_rect;								//数字の矩形をいれる
+		spr.pri = ( OBJECT_PRI ) * WP;
 		//spr.pri = UI_PRI * WP;								//描画優先度を設定
 
 		for( i = 0; i < 8 ; i++ )								//表示したい桁分を回す
@@ -161,7 +163,7 @@ void score_board_start( FLOAT x, FLOAT y, FLOAT z )
 	TASK *ap, *actp;
 	ap = TASK_start_MODEL( score_board_exec, OBJECT_GROUP, MODEL_BOATD, TEX_SCREEN_MEKA, "スコアボード" );
 	ap->ID = OBJ_MAX - 3;						//メインコンピューターの一つ前に設定しておく
-	object_sphire_set( ap->ID, 0, 1024.0f, 0.0f, 1024.0f );
+	object_sphire_set( ap->ID, 0, 512.0f, 0.0f, 700.0f );
 	ap->grp_mode = TEST_ZBUFFER | WRITE_ZBUFFER | USE_LIGHTING;
 	ap->pos[X] = x;
 	ap->pos[Y] = y;
@@ -185,9 +187,9 @@ void score_board_start( FLOAT x, FLOAT y, FLOAT z )
 	*/
 
 	actp = TASK_start_DRAWFUNC( hiscore_board_exec, score_board_drawfunc, NO_GROUP, "ボードにハイスコアを表示" );
-	actp->grp_mode = USE_3DPOS;// | TEST_ZBUFFER | WRITE_ZBUFFER;
+	actp->grp_mode = USE_3DPOS;
 	
-	actp->fwork1[Z] = -65.0f;
+	actp->fwork1[Z] = -85.0f;
 	actp->fwork1[X] = 64.0f;
 
 	actp->pos[X] = ap->pos[X] - 850.0f;

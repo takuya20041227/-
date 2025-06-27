@@ -1,3 +1,5 @@
+extern void common_tex_load( void );			//共通のグラフィックをロード
+extern void common_model_load(void);		//共通のモデルをロード
 extern void tex_game_load( void );			//ゲーム本編で使うグラフィックをロード
 extern void model_game_load( void );		//ゲーム本編で使うモデルをロード
 extern void tex_title_load( void );			//タイトル使うグラフィックをロード

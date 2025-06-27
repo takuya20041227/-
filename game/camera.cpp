@@ -177,9 +177,12 @@ void key_camera_control_exec( TASK *ap )
 			jiki->angle[X] = ang_x;
 		}
 
-		rp->camera[X] = camera_x[ MAIN_CAMERA ];
-		rp->camera[Y] = camera_y[ MAIN_CAMERA ];
-		rp->camera[Z] = camera_z[ MAIN_CAMERA ];
+		if( game_type == 101 )
+		{
+			rp->camera[ X ] = camera_x[ MAIN_CAMERA ];
+			rp->camera[ Y ] = camera_y[ MAIN_CAMERA ];
+			rp->camera[ Z ] = camera_z[ MAIN_CAMERA ];
+		}
 		//camera_ang_x[0] = SOZ_atan2( camera_x[0], camera_y[0], jiki->pos[X], jiki->pos[Y] );
 		//camera_ang_z[0] = SOZ_atan2( camera_x[0], camera_z[0], jiki->pos[X], jiki->pos[Z] );
 	}

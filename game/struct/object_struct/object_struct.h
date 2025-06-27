@@ -44,6 +44,7 @@
 #define	HOUSE_GROUP			6
 #define	HERI_GROUP			7
 #define	CAT_GROUP			8						//ネコ
+#define	UFO_ROOM_GROUP		9
 
 
 #define	MAIN_BILL_GRP_FLAG	TEST_ZBUFFER | WRITE_ZBUFFER  | NO_SHADOW	 | USE_LIGHTING | USE_SPECULAR
@@ -86,6 +87,7 @@ typedef struct
 	SINT32	flag;						//ステータスのフラグ
 	SINT32	icon;						//手が掴んだときの
 	SINT32	score;						//スコアの上昇量
+	FLOAT	scale;						//大きさ
 }	OBJECT_DATA;
 
 //extern OBJECT_DATA object_data[ ];		//オブジェクトの構造体

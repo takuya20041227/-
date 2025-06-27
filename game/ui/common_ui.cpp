@@ -519,5 +519,12 @@ void socre_start( FLOAT x, FLOAT y, FLOAT scale, SINT32 *score_p )
 }
 
 
+FLOAT sa_return(FLOAT ap_average, FLOAT actp_average)
+{
+	FLOAT sa, abs_sa;
+	sa = ap_average - actp_average;
+	abs_sa = ( FLOAT )fabs( ( DOUBLE )sa );
 
+	return abs_sa;
+}
 

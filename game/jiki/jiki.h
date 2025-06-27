@@ -1,13 +1,15 @@
 #define	JIKI_X		25000.0f	
 #define	JIKI_Y		1000.0f
 #define	JIKI_Z		10000.0f
+#define	JIKI_SPEED	40.0f
+
 
 //-----------------------------------------------------------------------------------------------------------------------
 //ビームのdefine
 //-----------------------------------------------------------------------------------------------------------------------
-#define	BEAM_TIME	2					//ビームのショット時間
-#define	BEAM_SPEED	80.0f
-#define	HAND_SPEED	BEAM_SPEED * 2
+#define	BEAM_TIME	4					//ビームのショット時間
+#define	BEAM_SPEED	240.0f
+#define	HAND_SPEED	BEAM_SPEED * 1.0f
 
 
 //-----------------------------------------------------------------------------------------------------------------------
@@ -28,11 +30,14 @@ typedef struct
 extern RECORD jiki_record[ TIME_M * 3 + 1 ];
 extern RECORD *rp;
 extern SINT32 record_fram;
+extern SINT32 push_flag; 
+
 
 //-----------------------------------------------------------------------------------------------------------------------
 //extern 
 //-----------------------------------------------------------------------------------------------------------------------
 extern	TASK *jiki;
+extern	void unique_box_init( void );
 extern	bool click_check, catch_switch;
 extern	void movement_get_key( TASK *ap);
 extern	void check_range_restriction( TASK *ap, FLOAT pos_x, FLOAT pos_y, FLOAT pos_z );
@@ -40,6 +45,7 @@ extern	void jiki_start( void );
 extern	void record_mane_start( void );
 extern	void hand_start( DEFAULT_ARGUMENT, ANGLE ang_x, ANGLE ang_y );		//壊れたオブジェクトを掴む手
 extern	void beam_bom_start( FLOAT x, FLOAT y, FLOAT z, FLOAT scale );					//ボムエフェクト
+extern	void game_over_efe_start( FLOAT x, FLOAT y, FLOAT z, FLOAT scale );
 
 extern	void specular_status_set( TASK *ap, FLOAT pow, FLOAT sp_r, FLOAT sp_g, FLOAT sp_b );
 extern	void specular_sturct_set( TASK *ap, OBJECT_DATA *op );
